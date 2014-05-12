@@ -2,17 +2,29 @@
 (use-package 'optima)
 (defparameter *B* ())
 (defparameter *primitive-methods* (make-hash-table))
+(defparameter *derived-methods* (make-hash-table))
+
+(defun dpl-error (msg) (error msg))
 
 (defun is-deduction? (F)
   (match F ((cons '! _) t)
 	 (otherwise nil)))
 
+(defun body-is-malformed? (body)
+  (match body 
+    ((cons '! others))))
 
 (defmacro define-primitive-method (name args &rest body)
   `(setf (gethash ',name *primitive-methods*) 
 	 (lambda ,(append (list 'B) args ) ,@body)))
 
-(defun dpl-error (msg) (error msg))
+(defmacro define-method (name args ded)
+  `(if (is-deduction? ',ded)
+       (progn (setf (gethash ',name *derived-methods*)
+		    (list ',args ',ded))
+	      ',name)
+      (error "Malformed deduction:~a" ',ded)))
+
 (defun eval-fun-args (phrases B I)
   (mapcar (lambda (F) (funcall I F B)) phrases))
 
@@ -35,26 +47,43 @@
 
 (defun is-primitive-method? (E) 
   (gethash E *primitive-methods*))
+(defun is-derived-method? (E) 
+  (or (gethash E *derived-methods*)
+      (match E 
+	((list 'phi _ _) t)
+	(otherwise nil))))
+
+
 
 (defun @prop (x) x)
 
 (defun mapply (m values) (apply (gethash m *primitive-methods*) values))
+
+(defun dapply (m B values) 
+  (let ((def (if (symbolp m)
+		 (gethash m *derived-methods*)
+		 (match m ((list 'phi args ded) (list args ded))))))
+    (I (subst* (zip (first def) values) (second def)) B)))
+
 (defun I (F &optional (B *B*))
   (let ((*B* B))
     (match F
-	   ;Clause 1: ! operator
-      ((cons '! (cons ?E  ?args))
+      ;Clause 1: ! operator
+      ((cons '! (cons E  args))
        (destructuring-bind (Values Bp)
-	   (eval-meth-args ?args *B* #'I)
-	 (cond ((is-primitive-method? ?E)
-		(mapply ?E (cons (append *B* Bp) Values )))
-	       (t (error "~a is not a method."?E)))))
-	   ;; Clause 2: assume E in D
-      ((cons 'assume (cons ?E ?D))
-       (let* ((P (I ?E B))
-	      (Q (I ?D (cons P B))))
+	   (eval-meth-args args *B* #'I)
+	 (cond ((is-primitive-method? E)
+		(mapply E (cons (append *B* Bp) Values )))
+	       ((is-derived-method? E)
+		(dapply E (append *B* Bp) Values))
+	       (t (error "~a is not a method." E)))))
+      ;; Clause 2: assume E in D
+      ((list 'assume E 'in D)
+       (let* ((P (I E B))
+	      (Q (I D (cons P B))))
 	 (@prop `(implies ,P ,Q))))
       ;; Symbols
+      ((not (cons _ _)) F)
       (P P))))
 
 (defparameter I #'I)
@@ -72,14 +101,14 @@
   (check-in-base P B)
   (match P ((list 'and _ right) right)))
 
-
-
 (define-primitive-method and-intro (P Q)
   (check-in-base P B)
   (check-in-base Q B)
   `(and ,P ,Q))
 
 
+(define-method commutative-and (x)
+  (! and-intro (! right-and x) (! left-and x)))
 
 
 

@@ -14,10 +14,20 @@
    '(and Q P)))
 
 
+(defparameter *test-3*
+  (list 
+   '((assume (and P Q) in (! and-intro (! right-and (and P Q)) (! left-and (and P Q)))) nil)
+   '(implies (and P Q) (and Q P))))
+
+(defparameter *test-4* 
+  (list 
+   '((! commutative-and (and P Q)) ((and P Q)))
+   '(and Q P)))
+
 (defun range (a b) (loop for i from a to b collect i))
 
 (defparameter *omega-dpl-tests* 
-  (let ((total-tests 2))
+  (let ((total-tests 4))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
@@ -61,4 +71,5 @@
   (format t "~% --- RUNNING TESTS --- ~%" )
   (force-output t)
   (time (run-tests verbose)))
-
+(defmacro @ (&rest forms)
+    `(apply #'I ',forms))
