@@ -1,6 +1,12 @@
 
+(use-package 'optima)
 (defparameter *B* ())
 (defparameter *primitive-methods* (make-hash-table))
+
+(defun is-deduction? (F)
+  (match F ((cons '! _) t)
+	 (otherwise nil)))
+
 
 (defmacro define-primitive-method (name args &rest body)
   `(setf (gethash ',name *primitive-methods*) 
@@ -8,7 +14,7 @@
 
 (defun dpl-error (msg) (error msg))
 (defun eval-fun-args (phrases B I)
-  (mapcar I phrases))
+  (mapcar (lambda (F) (funcall I F B)) phrases))
 
 (defun eval-meth-args (phrases B I)
   (let ((ded-results nil))
@@ -26,9 +32,7 @@
       (error "~a not in the assumption base." P)
       P))
 
-(defun is-deduction? (F)
-  (match F ((cons '! _) t)
-	 (otherwise nil)))
+
 (defun is-primitive-method? (E) 
   (gethash E *primitive-methods*))
 
@@ -80,9 +84,3 @@
 
 
 
-;;;;
-
-(defun tests ()
-  (assert 
-   (equalp 
-    '(and q p))))
