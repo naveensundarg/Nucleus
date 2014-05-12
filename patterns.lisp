@@ -1,0 +1,95 @@
+(defun variablep (sym)
+  (if (symbolp sym)  
+      (let ((name (symbol-name sym)))
+	(and
+	 (equal "?" (subseq name 0 1))
+	 (or
+	  (equalp "_" (subseq name 1 2))
+	  (alpha-char-p (char name 1)))))))
+
+(defun wildcardvarp (sym)
+  (and (variablep sym) 
+       (equalp "_" (subseq (symbol-name sym) 1 2))))
+
+(defun get-var (binding) (first binding))
+(defun get-val (binding) (second binding))
+
+
+(defun bindings-consistent? (bindings)
+  "Given a list of bindings, checks whether it is consistent.
+   If it is consistent, returns a canoncial form without any duplicates.
+   If it is not consistent, throws an error."
+  (reduce (lambda (x y)
+	    (let ((present? (member (get-var y) x :key #'first :test #'equalp))) 
+	      (if present?
+		  (if (not (equalp (get-val (first present?)) (get-val y))) 
+		      (error "Inconsistent-bindings ~a ~a" y x)
+		      x)
+		  (cons y x))))
+	  bindings :initial-value nil))
+
+(defun match (x y &key (rest nil))
+  (cond
+    ((variablep x) (list (list x y)))
+    ((variablep y) (list (list y x)))
+    ((and (atom x) (atom y)) 
+     (if (eql x y)
+	 () (error "Atoms ~a and ~a don't match." x y)))
+    ((and (atom x) (listp y) (not rest))
+     (error "Cannot unify atom ~a with cons ~a" x y))
+    ((and (atom y) (listp x) (not rest))
+     (error "Cannot unify atom ~a with cons ~a" y x))
+    ((and rest (atom x) (variablep x) (listp y))
+     (list (list x y)))
+    ((and rest (atom y) (variablep y) (listp x))
+     (list (list y x)))
+    (t 
+     (let ((bindings
+	    (append (match (car x) (car y))
+		    (cond 
+		      ((equalp '&rest (second x))
+		       (match (caddr x) (cdr y) :rest t))
+		      ((equalp '&rest (second y))
+		       (match (cdr x) (caddr y) :rest t))
+		      (t (match (cdr x) (cdr y)))))))
+       (bindings-consistent? bindings)))))
+
+(defun value (var bindings)
+  (second (assoc var bindings)))
+
+(defun get-let-list (pattern value)
+  (remove nil (mapcar (lambda (binding)
+			(if (wildcardvarp (get-var binding))
+			    nil
+			    (list (get-var binding)
+				  (get-val binding))))
+		      (match pattern value))))
+
+;; Example usage of plet
+;; (plet (or ?p ?q) '(and (if a b) (and r w)) &rest body)
+(defmacro plet (pattern value &body body)
+  `(let* ((bindings (get-let-list ',pattern ,value) )
+	  (nbody  (reduce
+			 (lambda (f binding) 
+			   (subst (list 'quote (get-val binding)) (get-var binding) f))
+			 bindings :initial-value (list 'progn ',@body))))
+     (eval nbody)))
+
+
+;; Example usage of plet*
+;; (defun foo (x)
+;; (plet* x 
+;; 	  ((sum ?x ?y) (+ ?x ?y))
+;; 	  ((mult ?x ?y) (* ?x ?y))))
+(defmacro plet* (obj &rest conditions)
+  `(block :top 
+     ,@(mapcar (lambda (condition)
+		 `(handler-case
+		      (return-from :top 
+			(plet ,(first condition) ,obj ,@(rest condition)))
+		    (simple-error (condition) (declare (ignore condition)))))
+	       conditions)))
+
+(defun smatch (p obj)
+  (handler-case (match p obj)
+      (simple-error (condition) (declare (ignore condition)))))
