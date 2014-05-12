@@ -9,6 +9,7 @@
 
 (defparameter *files*
   (list
+   "library"
    "omega-dpl" "omega-dpl-tests"))
 
 (defun compile-and-load (pathname &key (verbose nil))

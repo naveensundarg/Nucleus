@@ -53,7 +53,8 @@
 	((list 'phi _ _) t)
 	(otherwise nil))))
 
-
+(defun is-function? (E)
+  (and (fboundp E) (not (macro-function E))))
 
 (defun @prop (x) x)
 
@@ -82,7 +83,11 @@
        (let* ((P (I E B))
 	      (Q (I D (cons P B))))
 	 (@prop `(implies ,P ,Q))))
-      ;; Symbols
+      
+      ;;Function applications
+      ((guard (cons f args) 
+	      (is-function? f)) (apply f (eval-fun-args args *B* #'I)))
+      ;; Atoms
       ((not (cons _ _)) F)
       (P P))))
 
@@ -90,8 +95,18 @@
 
 ;;;;
 
+(defun matches (pat obj) (match obj (pat t) (otherwise nil)))
+(defun is-conditional? (P) (matches '(implies _ _) P))
 (define-primitive-method claim (P)
   (check-in-base P B))
+
+(define-primitive-method modus-ponens (antecedent implication)
+  (flet ((consequent (P) (third P)))
+    (check-in-base antecedent B)
+    (check-in-base implication B)
+    (match  implication
+      ((guard imp (and (is-conditional? imp)
+                       (matches `(implies ,antecedent _) imp))) (consequent implication)))))
 
 (define-primitive-method left-and (P)
   (check-in-base P B)

@@ -24,10 +24,20 @@
    '((! commutative-and (and P Q)) ((and P Q)))
    '(and Q P)))
 
+(defparameter *test-5*
+  (list 
+   '((assume P in (assume (implies P Q) in (! modus-ponens P (implies P Q))))nil)
+   '(implies P (implies (implies P Q) Q))))
+
+
+(defparameter *test-6*
+  (list 
+   '((assume (and Q P) in (! commutative-and (and Q P))) nil)
+   '(implies (and Q P) (and P Q))))
 (defun range (a b) (loop for i from a to b collect i))
 
 (defparameter *omega-dpl-tests* 
-  (let ((total-tests 4))
+  (let ((total-tests 6))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
