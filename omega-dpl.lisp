@@ -3,12 +3,26 @@
 (defparameter *B* ())
 (defparameter *primitive-methods* (make-hash-table))
 (defparameter *derived-methods* (make-hash-table))
+(import 'optima:match)
+(import 'optima:guard)
 
 
 (defclass proposition () ((value :initarg :value  :accessor p-value)))
 (defmethod print-object ((proposition proposition) stream)
   (format stream "[~a]"(p-value proposition)))
 
+(defun is-proposition? (proposition)
+  (flet ((syntax-check (P)  
+           (or (symbolp P)
+               (optima:match P
+                 ((or (list 'or _ _) (list 'and _ _) (list 'not _ )
+                      (list 'implies _ _)
+                      (list 'iff _ _)
+                      (list 'forall _ _)
+                      (list 'exists _ _))
+                  t)
+                 (_ nil)))))
+     (syntax-check proposition)))
 (defun $ (p) (if (is-proposition? p) 
                  (make-instance 'proposition :value p)
                  (error "~a not well formed." p)))
@@ -16,12 +30,12 @@
 (defun dpl-error (msg) (error msg))
 
 (defun is-deduction? (F)
-  (match F ((cons '! _) t)
-	 (otherwise nil)))
+  (optima:match F ((cons '! _) t)
+	 (_ nil)))
 
 (defun body-is-malformed? (body)
-  (match body 
-    ((cons '! others))))
+  (optima:match body 
+    ((cons '! _))))
 
 (defmacro define-primitive-method (name args &rest body)
   `(setf (gethash ',name *primitive-methods*) 
@@ -69,25 +83,14 @@
   (gethash E *primitive-methods*))
 (defun is-derived-method? (E) 
   (or (gethash E *derived-methods*)
-      (match E 
+      (optima:match E 
 	((list 'phi _ _) t)
-	(otherwise nil))))
+	(_ nil))))
 
 (defun is-function? (E)
   (and (fboundp E) (not (macro-function E))))
 
-(defun is-proposition? (proposition)
-  (flet ((syntax-check (P)  
-           (or (symbolp P)
-               (match P
-                 ((or (list 'or _ _) (list 'and _ _) (list 'not _ )
-                      (list 'implies _ _)
-                      (list 'iff _ _)
-                      (list 'forall _ _)
-                      (list 'exists _ _))
-                  t)
-                 (otherwise nil)))))
-     (syntax-check proposition)))
+
 (defun @prop (x)
   (flet ((head (p) (first p))
          (tail (p) (rest p)))
@@ -105,12 +108,14 @@
 (defun dapply (m B values) 
   (let ((def (if (symbolp m)
 		 (gethash m *derived-methods*)
-		 (match m ((list 'phi args ded) (list args ded))))))
+		 (optima:match m ((list 'phi args ded) (list args ded))))))
     (I (subst* (zip (first def) values) (second def)) B)))
 
+(defparameter *trace* nil)
 (defun I (F &optional (B *B*))
+  (if *trace* (format t "~a ~a" F B))
   (let ((*B* B))
-    (match F
+    (optima:match F
       ;Clause 1: ! operator
       ((cons '! (cons E  args))
        (destructuring-bind (Values Bp)
@@ -126,65 +131,24 @@
 	      (Q (I D (cons P B))))
 	 (@prop `(implies ,P ,Q))))
       ;;Propositions
-      ((guard P (equalp 'proposition (type-of P))) P)
+      ((optima:guard P (equalp 'proposition (type-of P))) F)
       ;;Function applications
-      ((guard (cons f args) 
+      ((optima:guard (cons f args) 
 	      (is-function? f)) (apply f (eval-fun-args args *B* #'I)))
       ;; Atoms
       ((not (cons _ _)) F)
-      (P P))))
+      (_ F))))
 
 (defparameter I #'I)
 
 ;;;;
 
-(defun matches (pat obj) (match obj (pat t) (otherwise nil)))
-(defun is-conditional? (P) (matches '(implies _ _) P))
 
-(define-primitive-method claim (P)
-  (check-in-base P B))
-
-(define-primitive-method modus-ponens (antecedent implication)
-  (flet ((consequent (P) (third P)))
-    (check-in-base antecedent B)
-    (check-in-base implication B)
-    (match (p-value implication)
-      ((guard imp (and (is-conditional? imp)
-                       (matches `(implies ,(p-value antecedent) _) imp))) 
-       (consequent (p-value implication))))))
-
-;; p=>q -
-(define-primitive-method modus-tollens (nconsequent implication)
-  (check-in-base nconsequent B)
-  (check-in-base implication B)
-  (match (p-value implication)
-    ((and (list 'implies ant conseq) (equalp conseq (p-value nconsequent))) 
-     (@prop `(not ,ant)))))
-
-(define-primitive-method or-intro (P Q)
-  (check-in-base-or B P Q)
-  (@prop `(or ,P ,Q)))
-
-
-(define-primitive-method left-and (P)
-  (check-in-base P B) 
-  (match (p-value P) ((list 'and left _) ($ left))))
-
-
-(define-primitive-method right-and (P)
-  (check-in-base P B)
-  (match (p-value P) ((list 'and _ right) ($ right))))
-
-(define-primitive-method and-intro (P Q)
-  (check-in-base P B)
-  (check-in-base Q B)
-  (@prop `(and ,P ,Q)))
-
-
-(define-method commutative-and (x)
-  (! and-intro (! right-and x) (! left-and x)))
-
-
+(defun is-conditional? (P) (optima:match P
+                             ((list 'implies _ _) P)
+                             (_ nil)))
 
 
 (defun prop? (x) (equalp 'proposition (type-of x)))
+
+(defun matches (pat obj) (equalp obj pat))

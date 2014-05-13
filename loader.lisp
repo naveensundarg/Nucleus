@@ -10,7 +10,9 @@
 (defparameter *files*
   (list
    "library"
-   "omega-dpl" "omega-dpl-tests"))
+   "omega-dpl"
+   "dcec.lisp"
+   "omega-dpl-tests"))
 
 (defun compile-and-load (pathname &key (verbose nil))
   (multiple-value-bind (output-pathname warnings-p failure-p)
