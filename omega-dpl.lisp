@@ -4,6 +4,15 @@
 (defparameter *primitive-methods* (make-hash-table))
 (defparameter *derived-methods* (make-hash-table))
 
+
+(defclass proposition () ((value :initarg :value  :accessor p-value)))
+(defmethod print-object ((proposition proposition) stream)
+  (format stream "[~a]"(p-value proposition)))
+
+(defun $ (p) (if (is-proposition? p) 
+                 (make-instance 'proposition :value p)
+                 (error "~a not well formed." p)))
+
 (defun dpl-error (msg) (error msg))
 
 (defun is-deduction? (F)
@@ -40,9 +49,20 @@
      ded-results)))
 
 (defun check-in-base (P B)  
-  (if (not (member P B :test #'equalp))
+  (if (not (member P B :test
+                   #'(lambda (x y) (equalp (p-value x)  (p-value y)))))
       (error "~a not in the assumption base." P)
       P))
+
+(defun check-in-base-or (B &rest props)  
+  (if (some  (complement #'null) 
+             (mapcar 
+              (lambda (P) (member P B :test #'(lambda (x y) (equalp (p-value x)  (p-value y)))))
+              props))
+      t
+      (error "None of ~a in the assumption base." props)))
+
+(check-in-base-or (list ($ 'P)) ($ 'P) ($'Q))
 
 
 (defun is-primitive-method? (E) 
@@ -56,7 +76,29 @@
 (defun is-function? (E)
   (and (fboundp E) (not (macro-function E))))
 
-(defun @prop (x) x)
+(defun is-proposition? (proposition)
+  (flet ((syntax-check (P)  
+           (or (symbolp P)
+               (match P
+                 ((or (list 'or _ _) (list 'and _ _) (list 'not _ )
+                      (list 'implies _ _)
+                      (list 'iff _ _)
+                      (list 'forall _ _)
+                      (list 'exists _ _))
+                  t)
+                 (otherwise nil)))))
+     (syntax-check proposition)))
+(defun @prop (x)
+  (flet ((head (p) (first p))
+         (tail (p) (rest p)))
+    (cond
+      ((equal 'proposition (type-of x)) x)
+      ((atom x) ($ x))
+      (t ($ (cons (head x) 
+                  (mapcar (lambda (y) (if (equalp 'proposition (type-of y))
+                                          (p-value y)
+                                          y))
+                          (tail x))))))))
 
 (defun mapply (m values) (apply (gethash m *primitive-methods*) values))
 
@@ -83,7 +125,8 @@
        (let* ((P (I E B))
 	      (Q (I D (cons P B))))
 	 (@prop `(implies ,P ,Q))))
-      
+      ;;Propositions
+      ((guard P (equalp 'proposition (type-of P))) P)
       ;;Function applications
       ((guard (cons f args) 
 	      (is-function? f)) (apply f (eval-fun-args args *B* #'I)))
@@ -97,6 +140,7 @@
 
 (defun matches (pat obj) (match obj (pat t) (otherwise nil)))
 (defun is-conditional? (P) (matches '(implies _ _) P))
+
 (define-primitive-method claim (P)
   (check-in-base P B))
 
@@ -104,22 +148,37 @@
   (flet ((consequent (P) (third P)))
     (check-in-base antecedent B)
     (check-in-base implication B)
-    (match  implication
+    (match (p-value implication)
       ((guard imp (and (is-conditional? imp)
-                       (matches `(implies ,antecedent _) imp))) (consequent implication)))))
+                       (matches `(implies ,(p-value antecedent) _) imp))) 
+       (consequent (p-value implication))))))
+
+;; p=>q -
+(define-primitive-method modus-tollens (nconsequent implication)
+  (check-in-base nconsequent B)
+  (check-in-base implication B)
+  (match (p-value implication)
+    ((and (list 'implies ant conseq) (equalp conseq (p-value nconsequent))) 
+     (@prop `(not ,ant)))))
+
+(define-primitive-method or-intro (P Q)
+  (check-in-base-or B P Q)
+  (@prop `(or ,P ,Q)))
+
 
 (define-primitive-method left-and (P)
-  (check-in-base P B)
-  (match P ((list 'and left _) left)))
+  (check-in-base P B) 
+  (match (p-value P) ((list 'and left _) ($ left))))
+
 
 (define-primitive-method right-and (P)
   (check-in-base P B)
-  (match P ((list 'and _ right) right)))
+  (match (p-value P) ((list 'and _ right) ($ right))))
 
 (define-primitive-method and-intro (P Q)
   (check-in-base P B)
   (check-in-base Q B)
-  `(and ,P ,Q))
+  (@prop `(and ,P ,Q)))
 
 
 (define-method commutative-and (x)
@@ -128,3 +187,4 @@
 
 
 
+(defun prop? (x) (equalp 'proposition (type-of x)))

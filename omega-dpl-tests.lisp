@@ -4,36 +4,48 @@
 
 (defparameter *test-1*
   (list  
-   '((! and-intro (! right-and (and P Q)) (! left-and (and P Q))) (list (and P Q)))
-   '(and Q P)))
+   (list '(! and-intro (! right-and ($ (and P Q))) (! left-and ($ (and P Q)))) 
+         (list ($ '(and P Q))))
+   ($ '(and Q P))))
 
 
 (defparameter *test-2*
   (list  
-   '((! and-intro (! left-and (and Q P)) (! right-and (and Q P))) (list (and Q P)))
-   '(and Q P)))
+   (list '(! and-intro (! left-and ($ (and Q P))) (! right-and ($ (and Q P)))) 
+         (list ($ '(and Q P))))
+   ($ '(and Q P))))
 
 
 (defparameter *test-3*
   (list 
-   '((assume (and P Q) in (! and-intro (! right-and (and P Q)) (! left-and (and P Q)))) nil)
-   '(implies (and P Q) (and Q P))))
+   (list '(assume ($ (and P Q)) in 
+           (! and-intro 
+            (! right-and ($ (and P Q))) 
+            (! left-and ($ (and P Q))))) 
+         nil)
+   ($'(implies (and P Q) (and Q P)))))
 
 (defparameter *test-4* 
   (list 
-   '((! commutative-and (and P Q)) ((and P Q)))
-   '(and Q P)))
+   (list '(! commutative-and ($ (and P Q))) 
+         (list ($ '(and P Q))))
+   ($ '(and Q P))))
 
 (defparameter *test-5*
   (list 
-   '((assume P in (assume (implies P Q) in (! modus-ponens P (implies P Q))))nil)
-   '(implies P (implies (implies P Q) Q))))
+   (list '(assume ($ P) in 
+           (assume ($ (implies P Q)) in 
+            (! modus-ponens ($ P) ($ (implies P Q)))))
+         nil)
+   ($ '(implies P (implies (implies P Q) Q)))))
 
 
 (defparameter *test-6*
   (list 
-   '((assume (and Q P) in (! commutative-and (and Q P))) nil)
-   '(implies (and Q P) (and P Q))))
+   (list '(assume ($ (and Q P)) in 
+           (! commutative-and ($ (and Q P))))
+         nil)
+   ($ '(implies (and Q P) (and P Q)))))
 (defun range (a b) (loop for i from a to b collect i))
 
 (defparameter *omega-dpl-tests* 
@@ -48,6 +60,10 @@
 	    (range 1 total-tests))))
 
 
+(defun Iequal (x y)
+  (cond ((and (prop? x) (prop? y )) 
+         (equalp (p-value x) (p-value y)))
+        (t (equalp x y))))
 (defun run-tests (&optional (str nil))
   (let ((count 0)
 	(passed 0)
@@ -57,7 +73,8 @@
 	      (if (not (member (1+ count) ignores-list))
 		  (let*
 		      ((I-out (apply #'I  (first test-case)))
-		       (result (equalp I-out (second test-case) )))
+		       (result 
+                         (Iequal I-out (second test-case) )))
 		    (format str 
 			    "--------~%Test Case ~a: ~%   ~a~%   ===>~%   ~a ~%   Passed? ~a~%" 
 			    (1+ count) 
