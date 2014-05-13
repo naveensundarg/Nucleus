@@ -14,6 +14,7 @@
 (defun get-var (binding) (first binding))
 (defun get-val (binding) (second binding))
 
+(defun @ (var bindings) (second (assoc var bindings)))
 
 (defun bindings-consistent? (bindings)
   "Given a list of bindings, checks whether it is consistent.
@@ -28,13 +29,13 @@
 		  (cons y x))))
 	  bindings :initial-value nil))
 
-(defun match (x y &key (rest nil))
+(defun unify (x y &key (rest nil))
   (cond
     ((variablep x) (list (list x y)))
     ((variablep y) (list (list y x)))
     ((and (atom x) (atom y)) 
      (if (eql x y)
-	 () (error "Atoms ~a and ~a don't match." x y)))
+	 () (error "Atoms ~a and ~a don't unify." x y)))
     ((and (atom x) (listp y) (not rest))
      (error "Cannot unify atom ~a with cons ~a" x y))
     ((and (atom y) (listp x) (not rest))
@@ -45,13 +46,13 @@
      (list (list y x)))
     (t 
      (let ((bindings
-	    (append (match (car x) (car y))
+	    (append (unify (car x) (car y))
 		    (cond 
 		      ((equalp '&rest (second x))
-		       (match (caddr x) (cdr y) :rest t))
+		       (unify (caddr x) (cdr y) :rest t))
 		      ((equalp '&rest (second y))
-		       (match (cdr x) (caddr y) :rest t))
-		      (t (match (cdr x) (cdr y)))))))
+		       (unify (cdr x) (caddr y) :rest t))
+		      (t (unify (cdr x) (cdr y)))))))
        (bindings-consistent? bindings)))))
 
 (defun value (var bindings)
@@ -63,7 +64,7 @@
 			    nil
 			    (list (get-var binding)
 				  (get-val binding))))
-		      (match pattern value))))
+		      (unify pattern value))))
 
 ;; Example usage of plet
 ;; (plet (or ?p ?q) '(and (if a b) (and r w)) &rest body)
@@ -90,6 +91,6 @@
 		    (simple-error (condition) (declare (ignore condition)))))
 	       conditions)))
 
-(defun smatch (p obj)
-  (handler-case (match p obj)
+(defun sunify (p obj)
+  (handler-case (unify p obj)
       (simple-error (condition) (declare (ignore condition)))))

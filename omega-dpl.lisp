@@ -13,7 +13,7 @@
 
 (defun is-proposition? (proposition)
   (flet ((syntax-check (P)  
-           (or (symbolp P)
+           (or  t (symbolp P) 
                (optima:match P
                  ((or (list 'or _ _) (list 'and _ _) (list 'not _ )
                       (list 'implies _ _)
@@ -111,6 +111,8 @@
 		 (optima:match m ((list 'phi args ded) (list args ded))))))
     (I (subst* (zip (first def) values) (second def)) B)))
 
+(defun prop? (x)  (equalp 'proposition (type-of x)))
+
 (defparameter *trace* nil)
 (defun I (F &optional (B *B*))
   (if *trace* (format t "~a ~a" F B))
@@ -131,7 +133,8 @@
 	      (Q (I D (cons P B))))
 	 (@prop `(implies ,P ,Q))))
       ;;Propositions
-      ((optima:guard P (equalp 'proposition (type-of P))) F)
+      ((list '$ P) (@prop P))
+      ((optima:guard P (prop? P)) F)
       ;;Function applications
       ((optima:guard (cons f args) 
 	      (is-function? f)) (apply f (eval-fun-args args *B* #'I)))
@@ -149,6 +152,5 @@
                              (_ nil)))
 
 
-(defun prop? (x) (equalp 'proposition (type-of x)))
 
 (defun matches (pat obj) (equalp obj pat))

@@ -35,10 +35,9 @@
   (list 
    (list '(assume ($ P) in 
            (assume ($ (implies P Q)) in 
-            (! modus-ponens ($ P) ($ (implies P Q)))))
+            (! cond-elim ($ P) ($ (implies P Q)))))
          nil)
    ($ '(implies P (implies (implies P Q) Q)))))
-
 
 (defparameter *test-6*
   (list 
@@ -46,10 +45,42 @@
            (! commutative-and ($ (and Q P))))
          nil)
    ($ '(implies (and Q P) (and P Q)))))
+
+(defparameter *test-7*
+  (list 
+   (list '(assume ($ (not (not P))) in (! double-negation ($ (not (not P)))))
+         nil)
+   ($ '(implies (not (not P)) P))))
+
+(defparameter *test-8*
+  (list 
+   (list '(! constructive-dilemma ($ (or P1 P2)) ($ (implies P1 Q)) ($ (implies P2 Q)))
+         (list ($ '(or P1 P2)) ($ '(implies P1 Q)) ($'(implies P2 Q))))
+   ($ 'Q)))
+
+(defparameter *test-9*
+  (list (list '(! equivalence ($ (implies P Q)) ($ (implies Q P)))
+              (list ($ '(implies P Q)) ($ '(implies Q P))))
+        ($ '(iff P Q))))
+
+(defparameter *test-10*
+  (list (list '(assume ($ (iff P Q)) in (! left-iff ($ (iff P Q))))
+              nil)
+        ($ '(implies (iff P Q) P))))
+
+(defparameter *test-11*
+  (list (list '(assume ($ (iff P Q)) in (! right-iff ($ (iff P Q))))
+              nil)
+        ($ '(implies (iff P Q) Q))))
+
+(defparameter *test-12*
+  (list (list '(! absurd ($ P) ($ (not P)))
+              (list ($ 'P) ($ '(not P))))
+        ($ 'false)))
 (defun range (a b) (loop for i from a to b collect i))
 
 (defparameter *omega-dpl-tests* 
-  (let ((total-tests 6))
+  (let ((total-tests 12))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
@@ -98,5 +129,3 @@
   (format t "~% --- RUNNING TESTS --- ~%" )
   (force-output t)
   (time (run-tests verbose)))
-(defmacro @ (&rest forms)
-    `(apply #'I ',forms))
