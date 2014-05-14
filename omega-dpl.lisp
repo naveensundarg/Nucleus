@@ -147,12 +147,7 @@
       ;;Propositions
       ((list '$ P) (@prop P))
       ((optima:guard P (prop? P)) F)
-      ;;Function applications
-      ((optima:guard (cons f args) 
-	      (is-function? f)) (apply f (eval-fun-args args *B* #'I)))
-      ;; Atoms
-      ((not (cons _ _)) F)
-      (_ (error "~a not interpretable" F)))))
+      (_ (eval F)))))
 
 (defparameter I #'I)
 
