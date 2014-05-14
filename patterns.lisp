@@ -94,3 +94,16 @@
 (defun sunify (p obj)
   (handler-case (unify p obj)
       (simple-error (condition) (declare (ignore condition)))))
+
+(defun variables (P)
+  (cond ((variablep P)(list P))
+        ((atom P) nil)
+        (t (remove-duplicates (apply #'append (mapcar #'variables P))
+                            :test #'equalp))))
+
+(defun freevars (P)
+  (let ((all-vars (variables P)))
+    (optima:match P
+      ((or (list 'exists vars Q) (list 'forall vars Q)) 
+       (set-difference all-vars vars :test #'equalp))
+      (_ all-vars))))

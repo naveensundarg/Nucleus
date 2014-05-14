@@ -77,10 +77,45 @@
   (list (list '(! absurd ($ P) ($ (not P)))
               (list ($ 'P) ($ '(not P))))
         ($ 'false)))
+
+
+(defparameter *test-13*
+  (list 
+   (list '(assume ($ P) in
+           (assume ($ Q) in
+            (! claim ($ P))))
+         nil)
+   ($ '(implies P (implies Q P))))
+  "P=>(Q=>P)")
+
+
+(defparameter *test-14*
+  (list 
+   (list 
+    `(assume 
+      ($ H) in
+      (suppose-absurd 
+       ($ Ma) in
+       (dseq 
+        (! modus-ponens ($ H) ($ (implies H (and E D))))
+        (! left-and ($ (and E D)))
+        (! left-either ($ E) ($ My))
+        (! modus-ponens ($ (or E My)) ($ (implies (or E My) R)))
+        (! modus-ponens ($ Ma) ($ (implies Ma (not R))))
+        (! absurd ($ R) ($ (not R))))))
+    (list ($ '(implies H (and E D)))
+          ($ '(implies (or E My) R))
+          ($ '(implies Ma (not R)))))
+   ($ '(implies H (not Ma))))
+  "kok_o213_8_32")
+
+
 (defun range (a b) (loop for i from a to b collect i))
 
+
+
 (defparameter *omega-dpl-tests* 
-  (let ((total-tests 12))
+  (let ((total-tests 14))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

@@ -6,6 +6,8 @@
 (define-primitive-method claim (P)
   (have? P))
 
+
+(defmacro {} () '(declare (ignore B)))
 (define-primitive-method modus-ponens (antecedent implication)
   (flet ((consequent (P) (third P)))
     (have? antecedent)
@@ -86,6 +88,14 @@
 (define-primitive-method true-intro () (declare (ignore B)) ($ 'true))
 (define-primitive-method false-elim () (declare (ignore B))($ '(not false)))
 
+
+(define-primitive-method =-intro (a)
+  (declare (ignore B))
+  (@prop `(= ,a ,a)))
+
+(define-primitive-method =-intro (a)
+  (declare (ignore B))
+  (@prop `(= ,a ,a)))
 ;; Elim rules
 
 

@@ -112,7 +112,7 @@
     (I (subst* (zip (first def) values) (second def)) B)))
 
 (defun prop? (x)  (equalp 'proposition (type-of x)))
-
+(defun false? (x) (equalp (p-value x) 'false))
 (defparameter *trace* nil)
 (defun I (F &optional (B *B*))
   (if *trace* (format t "~a ~a" F B))
@@ -132,6 +132,18 @@
        (let* ((P (I E B))
 	      (Q (I D (cons P B))))
 	 (@prop `(implies ,P ,Q))))
+      ((list 'suppose-absurd E 'in D)
+       (let*((abs (I E B))
+             (P (I D (cons abs B))))
+         (if (false? P)
+             (@prop `(not ,abs))
+             (error "suppose-absurd failed, got ~a" P))))
+      ;; (begin end)
+      ((cons 'dseq Deds) 
+       (let ((Bseq B)) 
+         (reduce (lambda (x y) 
+                   (setf Bseq (cons x Bseq))
+                   (I y Bseq)) Deds :initial-value ($ 'true))))
       ;;Propositions
       ((list '$ P) (@prop P))
       ((optima:guard P (prop? P)) F)
@@ -140,7 +152,7 @@
 	      (is-function? f)) (apply f (eval-fun-args args *B* #'I)))
       ;; Atoms
       ((not (cons _ _)) F)
-      (_ F))))
+      (_ (error "~a not interpretable" F)))))
 
 (defparameter I #'I)
 
