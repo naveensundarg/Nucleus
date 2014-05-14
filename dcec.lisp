@@ -10,10 +10,10 @@
   (flet ((consequent (P) (third P)))
     (have? antecedent)
     (have? implication)
-    (match (p-value implication)
+    (pmatch implication
       ((guard imp (and (is-conditional? imp)
-                       (matches `(implies ,(p-value antecedent) _) imp))) 
-       (consequent (p-value implication))))))
+                       (matches `(implies ,(p-value antecedent) ,(consequent imp)) imp))) 
+       (@prop (consequent imp))))))
 
 (define-primitive-method modus-tollens (nconsequent implication)
   (have? nconsequent)
@@ -96,6 +96,6 @@
 ;; Derived methods
 
 (define-method commutative-and (x)
-  (! and-intro (! right-and x) (! left-and x)))
+  (! both (! right-and x) (! left-and x)))
 
 

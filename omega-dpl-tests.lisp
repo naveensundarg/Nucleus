@@ -4,14 +4,14 @@
 
 (defparameter *test-1*
   (list  
-   (list '(! and-intro (! right-and ($ (and P Q))) (! left-and ($ (and P Q)))) 
+   (list '(! both (! right-and ($ (and P Q))) (! left-and ($ (and P Q)))) 
          (list ($ '(and P Q))))
    ($ '(and Q P))))
 
 
 (defparameter *test-2*
   (list  
-   (list '(! and-intro (! left-and ($ (and Q P))) (! right-and ($ (and Q P)))) 
+   (list '(! both (! left-and ($ (and Q P))) (! right-and ($ (and Q P)))) 
          (list ($ '(and Q P))))
    ($ '(and Q P))))
 
@@ -19,7 +19,7 @@
 (defparameter *test-3*
   (list 
    (list '(assume ($ (and P Q)) in 
-           (! and-intro 
+           (! both 
             (! right-and ($ (and P Q))) 
             (! left-and ($ (and P Q))))) 
          nil)
@@ -35,7 +35,7 @@
   (list 
    (list '(assume ($ P) in 
            (assume ($ (implies P Q)) in 
-            (! cond-elim ($ P) ($ (implies P Q)))))
+            (! modus-ponens ($ P) ($ (implies P Q)))))
          nil)
    ($ '(implies P (implies (implies P Q) Q)))))
 
