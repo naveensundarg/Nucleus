@@ -109,13 +109,33 @@
    ($ '(implies H (not Ma))))
   "kok_o213_8_32")
 
+(defparameter *test-15*
+  (list (list 
+         `(dlet ((P1 ($ (implies H (and E D))))
+                 (P2 ($ (implies (or E My) R)))
+                 (P3 ($ (implies Ma (not R)))))
+                in
+           (assume ($ H) in
+                   (suppose-absurd ($ Ma) in
+                                   (dseq 
+                                    (! modus-ponens ($ H) P1)
+                                    (! left-and ($ (and E D)))
+                                    (! left-either ($ E) ($ My))
+                                    (! modus-ponens ($ (or E My)) P2)
+                                    (! modus-ponens ($ Ma) P3)
+                                    (! absurd ($ R) ($ (not R)))))))
+         (list ($ '(implies H (and E D)))
+               ($ '(implies (or E My) R))
+               ($ '(implies Ma (not R)))))
+        ($ '(implies H (not Ma)))
+        "same as 14 but with dlet"))
 
 (defun range (a b) (loop for i from a to b collect i))
 
 
 
 (defparameter *omega-dpl-tests* 
-  (let ((total-tests 14))
+  (let ((total-tests 15))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

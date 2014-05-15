@@ -10,6 +10,7 @@
 (defparameter *files*
   (list
    "library"
+   "patterns"
    "omega-dpl"
    "dcec.lisp"
    "omega-dpl-tests"))
