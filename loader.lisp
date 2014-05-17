@@ -13,6 +13,7 @@
    "patterns"
    "omega-dpl"
    "dcec.lisp"
+   "propositional-tests"
    "omega-dpl-tests"))
 
 (defun compile-and-load (pathname &key (verbose nil))
