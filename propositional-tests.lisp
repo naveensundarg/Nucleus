@@ -252,7 +252,7 @@
 
 
 
-(defparameter *omega-dpl-tests* 
+(defparameter *propositional-tests* 
   (let ((total-tests 18))
     (mapcar (lambda (n)
 	      (eval 
@@ -293,9 +293,13 @@
 				 (1+ count))
 			 (force-output str)
 			 (incf count))))
-	    *omega-dpl-tests*)
-    (format t "~% Total Passed ~a out of ~a." passed (- count (length ignores-list)))
-    (format t "~% Ignored ~a" (length ignores-list))
+	    *propositional-tests*)
+    (push (format nil 
+                  "~% Propositional Tests: Total Passed ~a out of ~a." 
+                  passed (- count (length ignores-list)))
+          *reports* )
+    (push (format nil "~% Ignored ~a" (length ignores-list))
+          *reports* )
     (force-output t)))
 
  

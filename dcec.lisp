@@ -96,8 +96,6 @@
 (define-primitive-method =-intro (a)
   (declare (ignore B))
   (@prop `(= ,a ,a)))
-;; Elim rules
-
 
 
 ;; Other convenient primitive rules

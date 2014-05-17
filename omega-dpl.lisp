@@ -103,6 +103,28 @@
                                           y))
                           (tail x))))))))
 
+(defun quantifier (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall _ _) 'forall)
+    ((list 'exists _ _) 'exists)))
+
+(defun kernel (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall _ K) K)
+    ((list 'exists _ K) K)))
+
+(defun top-var (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall vars _) (first vars))
+    ((list 'exists vars _) (first vars))))
+
+(defun rest-vars (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall vars _) (rest vars))
+    ((list 'exists vars _) (rest vars))))
+
+
+
 (defun mapply (m values) (apply (gethash m *primitive-methods*) values))
 
 (defun dapply (m B values) 
@@ -127,7 +149,21 @@
                           ((cons '! _) (second ans))
                           (_ nil)))
                       answers bindings)))
+(defun specialize (Univ B term)
+  (let* ((univ-evaled (I Univ B))
+         (syn (p-value univ-evaled)))
+    (if (check-in-base univ-evaled B)
+        (if (rest-vars syn)
+            (@prop (list (quantifier syn ) 
+                         (rest-vars syn) 
+                         (subst term  (top-var syn) (kernel syn))))
+            (@prop (subst term  (top-var syn) (kernel syn)))))))
 
+(defun ex-generalize (Exists B term)
+  (let* ((exists-evaled (I Exists B))
+         (syn (p-value exists-evaled)))
+    (if (check-in-base (@prop (subst term (top-var syn) (kernel syn))) B)
+        exists-evaled)))
 (defun I (F &optional (B *B*))
   (if *trace* (format t "~a ~a" F B))
   (let ((*B* B))
@@ -153,6 +189,11 @@
          (if (false? P)
              (@prop `(not ,abs))
              (error "suppose-absurd failed, got ~a" P))))
+      ;; Quantifiers
+      ((list 'specialize Univ 'with term) 
+       (specialize Univ B term))
+      ((list 'ex-generalize Exists 'from term) 
+       (ex-generalize Exists B term))
       ;; Clause 4: (dlet ((I1 D1) (I2 D2)) in D)
       ((list 'dlet bindings 'in D)
        (let ((evaluated-bindings 
