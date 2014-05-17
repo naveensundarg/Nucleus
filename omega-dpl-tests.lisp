@@ -130,6 +130,10 @@
         ($ '(implies H (not Ma)))
         "same as 14 but with dlet"))
 
+
+
+
+
 (defparameter *test-16*
   (list 
    (list 
@@ -153,12 +157,103 @@
    ($ '(implies H (not Ma))))
   "nested dlet and using a deduction's result in the body of the dlet")
 
+
+
+(defparameter *test-17* 
+  (list 
+   (list
+    '(dlet 
+      ((Premise1 ($ (and (implies H (and E Ma))
+                         (implies (not H) (and (not E) (not Ma))))))
+       (Premise2 ($ (implies (not H) (not My)))))
+      in 
+      (assume Premise1 in
+       (assume Premise2 in
+        (dseq 
+         (assume ($ H) in 
+                 (dseq  
+                  (! left-and Premise1)
+                  (! modus-ponens ($ H) ($ (implies H (and E Ma))))
+                  (! right-and ($ (and E Ma)))
+                  (! left-either ($ Ma) ($ MY))))
+         (assume 
+          ($ (or Ma My)) in  
+          (dseq 
+           (! right-and Premise1)
+           (assume 
+            ($ Ma) in
+            (dseq 
+             (suppose-absurd 
+              ($ (not H)) in	
+              (dseq 
+               (! right-and Premise1)
+               (! modus-ponens ($ (not H)) ($ (implies (not H) (and (not E) (not Ma)))))
+               (! right-and ($ (and (not E) (not Ma))))
+               (! absurd ($ Ma) ($ (not Ma)))))
+             (! double-negation ($ (not (not H))))))
+           (assume 
+            ($ My) in
+            (dseq 
+             (suppose-absurd
+              ($ (not H)) in
+              (dseq 
+               (! modus-ponens ($ (not H)) Premise2)
+               (! absurd ($ My) ($ (not My)))))
+             (! double-negation ($ (not (not H))))))
+           (! constructive-dilemma ($ (or Ma My)) ($ (implies Ma H)) ($ (implies My H)))))
+         (! equivalence ($ (implies H (or Ma My))) ($ (implies (or Ma My) H)))))))
+    nil)
+   ($ '(implies (and 
+                 (implies H (and E Ma))
+                 (implies (not H) (and (not E) (not Ma))))
+        (implies (implies (not H) (not My))
+         (iff H (or Ma My)))))))
+
+
+(defparameter *test-18*
+  (list
+   (list 
+    '(dlet ((P1 ($ (implies (not Cube_b) Small_b)))
+            (P2 ($ (implies Small_c (or Small_d Small_e))))
+            (P3 ($ (implies Small_d (not Small_c))))
+            (P4 ($ (implies Cube_b (not Small_e))))) in
+      (assume ($ Small_c) in
+       (dseq 
+        (suppose-absurd 
+         ($ Small_d) in
+         (dseq
+          (! modus-ponens ($ Small_d) P3)
+          (! absurd ($ Small_c) ($ (not Small_c)))))
+        (! modus-ponens ($ Small_c) P2)
+        (assume ($ Small_e) in (! claim ($ Small_e)))
+        (assume 
+         ($ Small_d) in
+         (dseq 
+          (suppose-absurd 
+           ($ (not Small_e)) in
+           (! absurd ($ Small_d) ($ (not Small_d))))
+          (! double-negation ($ (not (not Small_e))))))
+        (suppose-absurd 
+         ($ Cube_b) in
+         (dseq
+          (! constructive-dilemma ($ (or Small_d Small_e)) ($ (implies Small_d Small_e)) ($ (implies Small_e Small_e)))
+          (! modus-ponens ($ Cube_b) P4)
+          (! absurd ($ Small_e) ($ (not Small_e)))))
+        (! modus-ponens ($ (not Cube_b)) P1))))
+    (list ($ '(implies (not Cube_b) Small_b))
+          ($ '(implies Small_c (or Small_d Small_e)))
+          ($ '(implies Small_d (not Small_c)))
+          ($ '(implies Cube_b (not Small_e)))))
+   ($ '(implies Small_c Small_b))))
+
+
+
 (defun range (a b) (loop for i from a to b collect i))
 
 
 
 (defparameter *omega-dpl-tests* 
-  (let ((total-tests 16))
+  (let ((total-tests 18))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
