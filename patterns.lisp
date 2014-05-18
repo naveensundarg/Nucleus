@@ -8,14 +8,31 @@
 	  (alpha-char-p (char name 1)))))))
 
 (defun subst-var (var term F &optional (bound nil))
-  (match F 
+  (optima:match F 
     ((list (or 'forall 'exists) vars K) 
      (list (quantifier F)  vars (subst-var var term K (append bound vars))))
     ((cons head args)
      (cons head (mapcar (lambda (arg) (subst-var var term arg bound)) args)))
-    ((guard x (variablep x))
-     (if (and (equalp x var) (not (member x bound)))
-         term x))))
+    (otherwise
+     (if (and   (equalp F var) (not (member F bound)))
+         term F))))
+
+
+(defun F= (F1 F2 &key (bound1 nil) (bound2 nil))
+  (optima:match (list F1 F2) 
+    ((or (list (list 'forall vars1 K1) (list 'forall vars2 K2))
+         (list (list 'exists vars1 K1) (list 'exists vars2 K2)))
+     (F= K1 K2 :bound1 (append bound1 vars1) :bound2 (append bound2 vars2)))
+    ((list (cons head1 args1) (cons head2 args2))
+     (every (complement #'null)
+      (cons (F= head1 head2 :bound1 bound1 :bound2 bound2)  
+            (mapcar (lambda (a1 a2) (F= a1 a2 :bound1 bound1 :bound2 bound2)) 
+                    args1 args2))))
+    (otherwise
+     (or
+      (if (and (member F1 bound1) (member F2 bound2))
+       (= (position F1 bound1) (position F2 bound2)))
+      (equalp F1 F2)))))
 
 (defun wildcardvarp (sym)
   (and (variablep sym) 

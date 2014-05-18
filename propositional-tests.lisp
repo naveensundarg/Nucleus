@@ -278,7 +278,7 @@
 		  (let*
 		      ((I-out (apply #'I  (first test-case)))
 		       (result 
-                         (Iequal I-out (second test-case) )))
+                         (F= (p-value I-out) (p-value (second test-case)) )))
 		    (format str 
 			    "--------~%Test Case ~a: ~%   ~a~%   ===>~%   ~a ~%   Passed? ~a~%" 
 			    (1+ count) 

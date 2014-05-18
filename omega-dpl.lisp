@@ -165,6 +165,13 @@
          (syn (p-value exists-evaled)))
     (if (check-in-base (@prop (subst term (top-var syn) (kernel syn))) B)
         exists-evaled)))
+
+(defparameter *var-counter* 0)
+(defun new-var () (intern (concatenate 'string "?Z" (princ-to-string (incf *var-counter*)))))
+
+(defun pick-any (x D B)
+  (let ((uvar (new-var)))
+    (@prop `(forall (,uvar) ,(I (subst-var x uvar D) B)))))
 (defun I (F &optional (B *B*))
   (if *trace* (format t "~a ~a" F B))
   (let ((*B* B))
@@ -196,7 +203,7 @@
       ((list 'ex-generalize Exists 'from term) 
        (ex-generalize Exists B term))
       ((list 'pick-any x 'in D)
-       (@prop `(forall (?y) ,(I (subst-var x (gensym "?x") D) B))))
+       (pick-any x D B))
       ;; Clause 4: (dlet ((I1 D1) (I2 D2)) in D)
       ((list 'dlet bindings 'in D)
        (let ((evaluated-bindings 

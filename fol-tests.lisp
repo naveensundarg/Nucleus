@@ -35,8 +35,20 @@
    ($ '(implies (forall (x) (implies (man x) (mortal x)))
         (implies (man socrates) (mortal socrates))))))
 
+
+(defparameter *fol-test-4*
+  (list 
+   (list '(pick-any a in 
+	       (dseq 
+		(specialize ($ (forall (x) (and (P x) (Q x)))) with a)
+		(! right-and ($ (and (P a) (Q a))))
+		(! left-and ($ (and (P a) (Q a))))
+		(! both ($ (Q a)) ($ (P a)))))
+         (list ($ '(forall (x) (and (P x) (Q x))))))
+   ($ '(forall (?z7) (and (q ?z7) (p ?z7))))))
+
 (defparameter *fol-tests* 
-  (let ((total-tests 3))
+  (let ((total-tests 4))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
@@ -47,6 +59,8 @@
 	    (range 1 total-tests))))
 
 
+(defun alpha-numeric-equal (x y)
+  )
 (defun Iequal (x y)
   (cond ((and (prop? x) (prop? y )) 
          (equalp (p-value x) (p-value y)))
@@ -63,7 +77,7 @@
 		  (let*
 		      ((I-out (apply #'I  (first test-case)))
 		       (result 
-                         (Iequal I-out (second test-case) )))
+                        (F= (p-value I-out) (p-value (second test-case)) )))
 		    (format str 
 			    "--------~%Test Case ~a: ~%   ~a~%   ===>~%   ~a ~%   Passed? ~a~%" 
 			    (1+ count) 
