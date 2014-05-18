@@ -20,8 +20,23 @@
    ($ '(implies (P a) (exists (x) (P x))))))
 
 
+(defparameter *fol-test-3*
+  (list 
+   (list 
+    '(assume ($ (forall (x) (implies (Man x) (Mortal x)))) in
+      (assume ($ (Man Socrates)) in
+       (dseq
+        (specialize ($ (forall (x) (implies (Man x) (Mortal x))))
+                    with Socrates)
+        (! modus-ponens ($ (Man Socrates)) 
+           ($ (implies (Man Socrates)
+                       (Mortal Socrates)))))))    
+    nil)
+   ($ '(implies (forall (x) (implies (man x) (mortal x)))
+        (implies (man socrates) (mortal socrates))))))
+
 (defparameter *fol-tests* 
-  (let ((total-tests 2))
+  (let ((total-tests 3))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

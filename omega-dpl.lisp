@@ -195,6 +195,8 @@
        (specialize Univ B term))
       ((list 'ex-generalize Exists 'from term) 
        (ex-generalize Exists B term))
+      ((list 'pick-any x 'in D)
+       (@prop `(forall (?y) ,(I (subst-var x (gensym "?x") D) B))))
       ;; Clause 4: (dlet ((I1 D1) (I2 D2)) in D)
       ((list 'dlet bindings 'in D)
        (let ((evaluated-bindings 
