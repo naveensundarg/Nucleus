@@ -108,22 +108,23 @@
     ((list 'forall _ _) 'forall)
     ((list 'exists _ _) 'exists)))
 
+(defun conn (F)
+  (optima:match F 
+    ((list (or 'and 'or 'iff 'implies) _ _) (first F))
+    ((list 'not _) 'not)))
+
 (defun kernel (quantifiedF)
   (optima:match quantifiedF 
-    ((list 'forall _ K) K)
-    ((list 'exists _ K) K)))
+    ((list (or 'forall 'exists) _ K) K)))
 
 (defun top-var (quantifiedF)
   (optima:match quantifiedF 
-    ((list 'forall vars _) (first vars))
-    ((list 'exists vars _) (first vars))))
+    ((list (or 'forall 'exists) vars _) (first vars))))
 
 (defun rest-vars (quantifiedF)
   (optima:match quantifiedF 
     ((list 'forall vars _) (rest vars))
     ((list 'exists vars _) (rest vars))))
-
-
 
 (defun mapply (m values) (apply (gethash m *primitive-methods*) values))
 

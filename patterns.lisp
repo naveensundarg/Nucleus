@@ -7,6 +7,20 @@
 	  (equalp "_" (subseq name 1 2))
 	  (alpha-char-p (char name 1)))))))
 
+(defun subst-var (var term F &optional (bound nil))
+  (match F 
+    ((list (or 'forall 'exists) vars K) 
+     (list (quantifier F)  var (subst-var var term K (append bound vars))))
+    ((list (or 'and 'or 'iff 'implies) P Q)
+     (list (conn F) (subst-var var term P bound) (subst-var var term Q bound)))
+    ((list 'not P)
+     (list 'not (subst-var var term P bound)))
+    ((cons head args)
+     (cons head (mapcar (lambda (arg) (subst-var var term arg bound)) args)))
+    ((guard x (variablep x))
+     (if (and (equalp x var) (not (member x bound)))
+         term x))))
+
 (defun wildcardvarp (sym)
   (and (variablep sym) 
        (equalp "_" (subseq (symbol-name sym) 1 2))))

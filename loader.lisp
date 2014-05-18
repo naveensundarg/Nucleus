@@ -5,6 +5,7 @@
 
 
 (mapcar #'ql:quickload *ql-modules*)
+(defparameter *reports* ())
 
 
 (defparameter *files*
@@ -14,6 +15,7 @@
    "omega-dpl"
    "dcec.lisp"
    "propositional-tests"
+   "fol-tests"
    "omega-dpl-tests"))
 
 (defun compile-and-load (pathname &key (verbose nil))

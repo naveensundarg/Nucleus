@@ -1,5 +1,4 @@
  
-(defparameter *reports* ())
 (defun run-all-tests (&optional (str nil))
   (let ((*reports*  ()))
     (format t "~% ====== RUNNING TESTS ===== ~%" )
