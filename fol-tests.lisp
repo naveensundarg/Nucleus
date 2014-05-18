@@ -57,7 +57,7 @@
 		 (specialize ($ (forall (x) (P x))) with y)
 		 (! absurd ($ (P y))($ (not (P y))))))))
          nil)
-   ($ '(implies (forall (x) (p x)) (not (exists (x) (not (p x))))))))
+   ($ '(implies (forall (x) (P x)) (not (exists (x) (not (P x))))))))
 
 
 (defparameter *fol-test-6*
@@ -70,10 +70,36 @@
             (! modus-ponens ($ (Q y)) ($ (implies (Q y) (R y))))))
          (list ($ '(forall (x) (and (P x) (Q x))))
 	       ($ '(forall (x) (implies (Q x) (R x))))))
-   ($ '(forall (?z8) (r ?z8)))))
+   ($ '(forall (?y) (R ?y)))))
+
+(defparameter *fol-test-7*
+  (list 
+   (list 
+    '(assume ($ (forall (x) (implies (P y) (Q x)))) in
+      (assume ($ (P y)) in
+       (pick-any z in
+        (dseq 
+         (specialize ($ (forall (x) (implies (P y) (Q x)))) with z)
+         (! modus-ponens ($ (p y)) ($ (implies (p y) (q z)))))))))
+   ($ '(implies (forall (x) (implies (P y) (Q x)))
+               (implies (P y) (forall (z) (Q z)))))))
+
+(defparameter *fol-test-8*
+  (list 
+   (list '(pick-witness z for ($ (exists (x) (and (R x) (P x)))) in
+	      (dseq
+	       (! right-and ($ (and (R z) (P z))))
+	       (specialize ($ (forall (x) (implies (P x) (Q x)))) with z)
+	       (! modus-ponens ($ (P z)) ($ (implies (P z) (Q z))))
+	       (! left-and ($ (and (R z) (P z))))
+	       (! both ($ (Q z)) ($ (R z)))
+	       (ex-generalize ($ (exists (y) (and (Q y) (R y)))) from z)))
+	    (list ($ '(forall (x) (implies (P x) (Q x))))
+		  ($ '(exists (x) (and (R x) (P x))))))
+   ($ '(exists (y) (and (Q y) (R y))))))
 
 (defparameter *fol-tests* 
-  (let ((total-tests 6))
+  (let ((total-tests 8))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

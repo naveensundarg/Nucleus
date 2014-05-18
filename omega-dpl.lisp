@@ -91,6 +91,11 @@
   (and (fboundp E) (not (macro-function E))))
 
 
+(defun is-conditional? (P) (optima:match P
+                             ((list 'implies _ _) P)
+                             (_ nil))) 
+(defun matches (pat obj) (equalp obj pat))
+
 (defun @prop (x)
   (flet ((head (p) (first p))
          (tail (p) (rest p))
@@ -244,14 +249,4 @@
       (_ (eval F)))))
 
 (defparameter I #'I)
-
 ;;;;
-
-
-(defun is-conditional? (P) (optima:match P
-                             ((list 'implies _ _) P)
-                             (_ nil)))
-
-
-
-(defun matches (pat obj) (equalp obj pat))
