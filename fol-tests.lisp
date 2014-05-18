@@ -47,8 +47,33 @@
          (list ($ '(forall (x) (and (P x) (Q x))))))
    ($ '(forall (?z7) (and (q ?z7) (p ?z7))))))
 
+
+(defparameter *fol-test-5*
+  (list 
+   (list '(assume ($ (forall (x) (P x))) in
+	      (suppose-absurd ($ (exists (x) (not (P x)))) in
+	       (pick-witness y for ($ (exists (x) (not (P x)))) in
+		(dseq
+		 (specialize ($ (forall (x) (P x))) with y)
+		 (! absurd ($ (P y))($ (not (P y))))))))
+         nil)
+   ($ '(implies (forall (x) (p x)) (not (exists (x) (not (p x))))))))
+
+
+(defparameter *fol-test-6*
+  (list 
+   (list '(pick-any y in
+           (dseq 
+            (specialize ($ (forall (x) (and (P x) (Q x)))) with y)
+            (! right-and ($ (and (P y) (Q y))))
+            (specialize ($ (forall (x) (implies (Q x) (R x)))) with y)
+            (! modus-ponens ($ (Q y)) ($ (implies (Q y) (R y))))))
+         (list ($ '(forall (x) (and (P x) (Q x))))
+	       ($ '(forall (x) (implies (Q x) (R x))))))
+   ($ '(forall (?z8) (r ?z8)))))
+
 (defparameter *fol-tests* 
-  (let ((total-tests 4))
+  (let ((total-tests 6))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
@@ -59,8 +84,7 @@
 	    (range 1 total-tests))))
 
 
-(defun alpha-numeric-equal (x y)
-  )
+ 
 (defun Iequal (x y)
   (cond ((and (prop? x) (prop? y )) 
          (equalp (p-value x) (p-value y)))

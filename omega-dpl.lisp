@@ -64,7 +64,7 @@
 
 (defun check-in-base (P B)  
   (if (not (member P B :test
-                   #'(lambda (x y) (equalp (p-value x)  (p-value y)))))
+                   #'(lambda (x y) (F= (p-value x)  (p-value y)))))
       (error "~a not in the assumption base." P)
       P))
 
@@ -93,14 +93,16 @@
 
 (defun @prop (x)
   (flet ((head (p) (first p))
-         (tail (p) (rest p)))
+         (tail (p) (rest p))
+         (val (p) 
+           (if (equalp 'proposition (type-of p))
+               (p-value p)
+               p)))
     (cond
       ((equal 'proposition (type-of x)) x)
       ((atom x) ($ x))
-      (t ($ (cons (head x) 
-                  (mapcar (lambda (y) (if (equalp 'proposition (type-of y))
-                                          (p-value y)
-                                          y))
+      (t ($ (cons (val (head x)) 
+                  (mapcar (lambda (y) (val y) )
                           (tail x))))))))
 
 (defun quantifier (quantifiedF)
@@ -150,6 +152,10 @@
                           ((cons '! _) (second ans))
                           (_ nil)))
                       answers bindings)))
+(defparameter *var-counter* 0)
+(defun new-var () 
+  (intern (concatenate 'string "?Z" (princ-to-string (incf *var-counter*)))))
+
 (defun specialize (Univ B term)
   (let* ((univ-evaled (I Univ B))
          (syn (p-value univ-evaled)))
@@ -166,12 +172,23 @@
     (if (check-in-base (@prop (subst term (top-var syn) (kernel syn))) B)
         exists-evaled)))
 
-(defparameter *var-counter* 0)
-(defun new-var () (intern (concatenate 'string "?Z" (princ-to-string (incf *var-counter*)))))
-
 (defun pick-any (x D B)
   (let ((uvar (new-var)))
     (@prop `(forall (,uvar) ,(I (subst-var x uvar D) B)))))
+
+(defun einstantiate (F e)
+  (optima:match (p-value F)
+    ((list 'exists vars K)
+     (let ((subbed (subst-var (first vars) e K)))
+       ($  (if (rest vars)
+               `(exists ,(rest vars) ,subbed)
+               subbed))))))
+(defun pick-witness (x Exists D B)
+  (check-in-base Exists B)
+  (let* ((evar (new-var))
+         (inst (einstantiate  Exists evar)))
+    (I (subst-var x evar D) (cons inst B))))
+
 (defun I (F &optional (B *B*))
   (if *trace* (format t "~a ~a" F B))
   (let ((*B* B))
@@ -204,6 +221,8 @@
        (ex-generalize Exists B term))
       ((list 'pick-any x 'in D)
        (pick-any x D B))
+      ((list 'pick-witness x 'for Exists 'in D)
+       (pick-witness x (I Exists B) D B))
       ;; Clause 4: (dlet ((I1 D1) (I2 D2)) in D)
       ((list 'dlet bindings 'in D)
        (let ((evaluated-bindings 
@@ -220,6 +239,7 @@
         (dseq B Deds))
       ;;Propositions
       ((list '$ P) (@prop P))
+      ((cons '@prop args) (@prop args))
       ((optima:guard P (prop? P)) F)
       (_ (eval F)))))
 
