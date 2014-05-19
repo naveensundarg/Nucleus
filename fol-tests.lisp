@@ -32,8 +32,8 @@
            ($ (implies (Man Socrates)
                        (Mortal Socrates)))))))    
     nil)
-   ($ '(implies (forall (x) (implies (man x) (mortal x)))
-        (implies (man socrates) (mortal socrates))))))
+   ($ '(implies (forall (x) (implies (Man x) (Mortal x)))
+        (implies (Man Socrates) (Mortal socrates))))))
 
 
 (defparameter *fol-test-4*
@@ -45,7 +45,7 @@
 		(! left-and ($ (and (P a) (Q a))))
 		(! both ($ (Q a)) ($ (P a)))))
          (list ($ '(forall (x) (and (P x) (Q x))))))
-   ($ '(forall (?z7) (and (q ?z7) (p ?z7))))))
+   ($ '(forall (z) (and (Q z) (P z))))))
 
 
 (defparameter *fol-test-5*
@@ -98,8 +98,74 @@
 		  ($ '(exists (x) (and (R x) (P x))))))
    ($ '(exists (y) (and (Q y) (R y))))))
 
+(defparameter *fol-test-9*
+  (list 
+   (list
+    '(pick-any y in
+      (assume ($ (A y)) in
+       (dseq
+        (specialize ($ (forall (x) (implies (A x) (G x)))) with y)
+        (! modus-ponens ($ (A y)) ($ (implies (A y) (G y))))
+        (specialize ($ (forall (x) (implies (G x) (C x)))) with y)
+        (! modus-ponens ($ (G y)) ($ (implies (G y) (C y))))
+        (specialize ($ (forall (x) (implies (C x) (H x)))) with y)
+        (! modus-ponens ($ (C y)) ($ (implies (C y) (H y)))))))
+    (list ($ '(forall (x) (implies (A x) (G x))))
+          ($ '(forall (x) (implies (C x) (H x))))
+          ($ '(forall (x) (implies (G x) (C x))))))
+   ($ '(forall (z) (implies (A z) (H z))))))
+
+(defparameter *fol-test-10*
+  (list 
+   (list 
+    '(assume ($ (forall (x) (and (P x) (Q x)))) in
+      (dseq
+       (pick-any y in
+        (dseq
+         (specialize ($ (forall (x) (and (P x) (Q x)))) with y)
+         (! left-and ($ (and (P y) (Q y))))))
+       (pick-any y in
+        (dseq
+         (specialize ($ (forall (x) (and (P x) (Q x)))) with y)
+         (! right-and ($ (and (P y) (Q y))))))
+       (! both ($ (forall (y) (P y))) ($ (forall (y) (Q y))))))
+    nil)
+   ($ '(implies (forall (x) (and (P x) (Q x)))
+        (and (forall (y) (P y)) (forall (y) (Q y)))))))
+
+
+(defparameter *fol-test-11*
+  (list
+   (list 
+    '(assume ($ (and (forall (x) (P x)) (forall (x) (Q x)))) in
+      (pick-any y in
+       (dseq
+        (! left-and ($ (and (forall (x) (P x)) (forall (x) (Q x)))))
+        (specialize ($ (forall (x) (P x))) with y)
+        (! right-and ($ (and (forall (x) (P x)) (forall (x) (Q x)))))
+        (specialize ($ (forall (x) (Q x))) with y)
+        (! both ($ (P y)) ($ (Q y))))))
+    nil)
+   ($ '(implies (and (forall (x) (p x)) (forall (x) (q x)))
+        (forall (z) (and (P z) (Q z)))))))
+
+(defparameter *fol-test-12*
+  (list
+   (list
+    '(assume ($ (exists (x) (and (P x) (Q x)))) in
+      (pick-witness y for ($ (exists (x) (and (P x) (Q x)))) in
+       (dseq
+        (! left-and ($ (and (P y) (Q y))))
+        (ex-generalize ($ (exists (x) (P x))) from y)
+        (! right-and ($ (and (P y) (Q y))))
+        (ex-generalize ($ (exists (x) (Q x))) from y)
+        (! both ($ (exists (x) (P x))) ($ (exists (x) (Q x)))))))
+    nil)
+   ($ '(implies (exists (x) (and (P x) (Q x)))
+        (and (exists (x) (P x)) (exists (x) (Q x)))))))
+
 (defparameter *fol-tests* 
-  (let ((total-tests 8))
+  (let ((total-tests 12))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 
