@@ -86,7 +86,10 @@
       (optima:match E 
 	((list 'phi _ _) t)
 	(_ nil))))
-
+(defun is-method? (E)
+  (or (is-primitive-method? E)
+      (is-derived-method? E)
+      ))
 (defun is-function? (E)
   (and (fboundp E) (not (macro-function E))))
 
