@@ -30,8 +30,10 @@
 (defun dpl-error (msg) (error msg))
 
 (defun is-deduction? (F)
-  (optima:match F ((cons '! _) t)
-	 (_ nil)))
+  (or (if (consp F)  (is-method? (first F)))
+      (optima:match F
+        ((cons (or '! 'pick-any 'ex-generalize 'specialize 'pick-witness) _) t)
+        (_ nil))))
 
 (defun body-is-malformed? (body)
   (optima:match body 
@@ -81,15 +83,16 @@
 
 (defun is-primitive-method? (E) 
   (gethash E *primitive-methods*))
+
 (defun is-derived-method? (E) 
   (or (gethash E *derived-methods*)
       (optima:match E 
 	((list 'phi _ _) t)
 	(_ nil))))
+
 (defun is-method? (E)
   (or (is-primitive-method? E)
-      (is-derived-method? E)
-      ))
+      (is-derived-method? E)))
 (defun is-function? (E)
   (and (fboundp E) (not (macro-function E))))
 
@@ -157,7 +160,7 @@
 (defun dlet-select-deds (answers bindings)
   (remove nil (mapcar (lambda (ans binding)
                         (optima:match (second binding)
-                          ((cons '! _) (second ans))
+                          ((optima:guard x (is-deduction? x)) (second ans))
                           (_ nil)))
                       answers bindings)))
 (defparameter *var-counter* 0)
@@ -197,19 +200,22 @@
          (inst (einstantiate  Exists evar)))
     (I (subst-var x evar D) (cons inst B))))
 
+(defun handle-method (E args B)
+  (destructuring-bind (Values Bp)
+      (eval-meth-args args B #'I)
+    (cond ((is-primitive-method? E)
+           (mapply E (cons (append B Bp) Values )))
+          ((is-derived-method? E)
+           (dapply E (append B Bp) Values))
+          (t (error "~a is not a method." E)))))
 (defun I (F &optional (B *B*))
   (if *trace* (format t "~a ~a" F B))
   (let ((*B* B))
     (optima:match F
       ;Clause 1: (! m args)
-      ((cons '! (cons E  args))
-       (destructuring-bind (Values Bp)
-	   (eval-meth-args args *B* #'I)
-	 (cond ((is-primitive-method? E)
-		(mapply E (cons (append *B* Bp) Values )))
-	       ((is-derived-method? E)
-		(dapply E (append *B* Bp) Values))
-	       (t (error "~a is not a method." E)))))
+      ((cons '! (cons E  args)) (handle-method E args *B*))
+      ((optima:guard x (if (consp x) (is-method? (first x))))
+       (handle-method (first F) (rest F) *B*))
       ;; Clause 2: (assume E in D)
       ((list 'assume E 'in D)
        (let* ((P (I E B))

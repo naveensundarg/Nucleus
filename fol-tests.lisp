@@ -28,7 +28,7 @@
        (dseq
         (specialize ($ (forall (x) (implies (Man x) (Mortal x))))
                     with Socrates)
-        (! modus-ponens ($ (Man Socrates)) 
+        (modus-ponens ($ (Man Socrates)) 
            ($ (implies (Man Socrates)
                        (Mortal Socrates)))))))    
     nil)
@@ -41,9 +41,9 @@
    (list '(pick-any a in 
 	       (dseq 
 		(specialize ($ (forall (x) (and (P x) (Q x)))) with a)
-		(! right-and ($ (and (P a) (Q a))))
-		(! left-and ($ (and (P a) (Q a))))
-		(! both ($ (Q a)) ($ (P a)))))
+		(right-and ($ (and (P a) (Q a))))
+		(left-and ($ (and (P a) (Q a))))
+		(both ($ (Q a)) ($ (P a)))))
          (list ($ '(forall (x) (and (P x) (Q x))))))
    ($ '(forall (z) (and (Q z) (P z))))))
 
@@ -55,7 +55,7 @@
 	       (pick-witness y for ($ (exists (x) (not (P x)))) in
 		(dseq
 		 (specialize ($ (forall (x) (P x))) with y)
-		 (! absurd ($ (P y))($ (not (P y))))))))
+		 (absurd ($ (P y))($ (not (P y))))))))
          nil)
    ($ '(implies (forall (x) (P x)) (not (exists (x) (not (P x))))))))
 
@@ -65,9 +65,9 @@
    (list '(pick-any y in
            (dseq 
             (specialize ($ (forall (x) (and (P x) (Q x)))) with y)
-            (! right-and ($ (and (P y) (Q y))))
+            (right-and ($ (and (P y) (Q y))))
             (specialize ($ (forall (x) (implies (Q x) (R x)))) with y)
-            (! modus-ponens ($ (Q y)) ($ (implies (Q y) (R y))))))
+            (modus-ponens ($ (Q y)) ($ (implies (Q y) (R y))))))
          (list ($ '(forall (x) (and (P x) (Q x))))
 	       ($ '(forall (x) (implies (Q x) (R x))))))
    ($ '(forall (?y) (R ?y)))))
@@ -80,7 +80,7 @@
        (pick-any z in
         (dseq 
          (specialize ($ (forall (x) (implies (P y) (Q x)))) with z)
-         (! modus-ponens ($ (p y)) ($ (implies (p y) (q z)))))))))
+         (modus-ponens ($ (p y)) ($ (implies (p y) (q z)))))))))
    ($ '(implies (forall (x) (implies (P y) (Q x)))
                (implies (P y) (forall (z) (Q z)))))))
 
@@ -88,11 +88,11 @@
   (list 
    (list '(pick-witness z for ($ (exists (x) (and (R x) (P x)))) in
 	      (dseq
-	       (! right-and ($ (and (R z) (P z))))
+	       (right-and ($ (and (R z) (P z))))
 	       (specialize ($ (forall (x) (implies (P x) (Q x)))) with z)
-	       (! modus-ponens ($ (P z)) ($ (implies (P z) (Q z))))
-	       (! left-and ($ (and (R z) (P z))))
-	       (! both ($ (Q z)) ($ (R z)))
+	       (modus-ponens ($ (P z)) ($ (implies (P z) (Q z))))
+	       (left-and ($ (and (R z) (P z))))
+	       (both ($ (Q z)) ($ (R z)))
 	       (ex-generalize ($ (exists (y) (and (Q y) (R y)))) from z)))
 	    (list ($ '(forall (x) (implies (P x) (Q x))))
 		  ($ '(exists (x) (and (R x) (P x))))))
@@ -105,11 +105,11 @@
       (assume ($ (A y)) in
        (dseq
         (specialize ($ (forall (x) (implies (A x) (G x)))) with y)
-        (! modus-ponens ($ (A y)) ($ (implies (A y) (G y))))
+        (modus-ponens ($ (A y)) ($ (implies (A y) (G y))))
         (specialize ($ (forall (x) (implies (G x) (C x)))) with y)
-        (! modus-ponens ($ (G y)) ($ (implies (G y) (C y))))
+        (modus-ponens ($ (G y)) ($ (implies (G y) (C y))))
         (specialize ($ (forall (x) (implies (C x) (H x)))) with y)
-        (! modus-ponens ($ (C y)) ($ (implies (C y) (H y)))))))
+        (modus-ponens ($ (C y)) ($ (implies (C y) (H y)))))))
     (list ($ '(forall (x) (implies (A x) (G x))))
           ($ '(forall (x) (implies (C x) (H x))))
           ($ '(forall (x) (implies (G x) (C x))))))
@@ -123,12 +123,12 @@
        (pick-any y in
         (dseq
          (specialize ($ (forall (x) (and (P x) (Q x)))) with y)
-         (! left-and ($ (and (P y) (Q y))))))
+         (left-and ($ (and (P y) (Q y))))))
        (pick-any y in
         (dseq
          (specialize ($ (forall (x) (and (P x) (Q x)))) with y)
-         (! right-and ($ (and (P y) (Q y))))))
-       (! both ($ (forall (y) (P y))) ($ (forall (y) (Q y))))))
+         (right-and ($ (and (P y) (Q y))))))
+       (both ($ (forall (y) (P y))) ($ (forall (y) (Q y))))))
     nil)
    ($ '(implies (forall (x) (and (P x) (Q x)))
         (and (forall (y) (P y)) (forall (y) (Q y)))))))
@@ -140,11 +140,11 @@
     '(assume ($ (and (forall (x) (P x)) (forall (x) (Q x)))) in
       (pick-any y in
        (dseq
-        (! left-and ($ (and (forall (x) (P x)) (forall (x) (Q x)))))
+        (left-and ($ (and (forall (x) (P x)) (forall (x) (Q x)))))
         (specialize ($ (forall (x) (P x))) with y)
-        (! right-and ($ (and (forall (x) (P x)) (forall (x) (Q x)))))
+        (right-and ($ (and (forall (x) (P x)) (forall (x) (Q x)))))
         (specialize ($ (forall (x) (Q x))) with y)
-        (! both ($ (P y)) ($ (Q y))))))
+        (both ($ (P y)) ($ (Q y))))))
     nil)
    ($ '(implies (and (forall (x) (p x)) (forall (x) (q x)))
         (forall (z) (and (P z) (Q z)))))))
@@ -155,11 +155,11 @@
     '(assume ($ (exists (x) (and (P x) (Q x)))) in
       (pick-witness y for ($ (exists (x) (and (P x) (Q x)))) in
        (dseq
-        (! left-and ($ (and (P y) (Q y))))
+        (left-and ($ (and (P y) (Q y))))
         (ex-generalize ($ (exists (x) (P x))) from y)
-        (! right-and ($ (and (P y) (Q y))))
+        (right-and ($ (and (P y) (Q y))))
         (ex-generalize ($ (exists (x) (Q x))) from y)
-        (! both ($ (exists (x) (P x))) ($ (exists (x) (Q x)))))))
+        (both ($ (exists (x) (P x))) ($ (exists (x) (Q x)))))))
     nil)
    ($ '(implies (exists (x) (and (P x) (Q x)))
         (and (exists (x) (P x)) (exists (x) (Q x)))))))
