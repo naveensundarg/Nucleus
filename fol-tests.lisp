@@ -1,7 +1,4 @@
 
-
-
-
 (defparameter *fol-test-1* 
   (list 
    (list
@@ -133,7 +130,6 @@
    ($ '(implies (forall (x) (and (P x) (Q x)))
         (and (forall (y) (P y)) (forall (y) (Q y)))))))
 
-
 (defparameter *fol-test-11*
   (list
    (list 
@@ -162,10 +158,59 @@
         (both ($ (exists (x) (P x))) ($ (exists (x) (Q x)))))))
     nil)
    ($ '(implies (exists (x) (and (P x) (Q x)))
-        (and (exists (x) (P x)) (exists (x) (Q x)))))))
+        (and (exists (x) (P x)) (exists (x) (Q x))))))
+  "DPL page 157")
+
+(defparameter *fol-test-13*
+  (list
+   (list '(assume ($ (or (forall (x) (P x)) (forall (x) (Q x)))) in
+	      (pick-any y in
+	       (dseq
+		(assume ($ (forall (x) (P x))) in
+		 (dseq
+		  (specialize ($ (forall (x) (P x))) with y)
+		  (left-either ($ (P y)) ($ (Q y)))))
+		(assume ($ (forall (x) (Q x))) in
+		 (dseq
+		  (specialize ($ (forall (x) (Q x))) with y)
+		  (right-either ($ (P y)) ($ (Q y)))))
+		(constructive-dilemma 
+                 ($ (or (forall (x) (P x)) (forall (x) (Q x))))
+                 ($ (implies (forall (x) (P x)) (or (P y) (Q y)))) 
+                 ($ (implies (forall (x) (Q x)) (or (P y) (Q y))))))))
+         nil)
+   ($ '(implies (or (forall (x) (P x)) (forall (x) (Q x)))
+        (forall (x) (or (P x) (Q x))))))
+  "DPL page 157")
+
+(defparameter *fol-test-14*
+  (list
+   (list 
+    '(assume ($ (not (exists (x) (P x)))) in
+      (pick-any y in
+       (suppose-absurd ($ (P y)) in
+        (dseq
+         (ex-generalize ($ (exists (x) (P x))) from y)
+         (absurd ($ (exists (x) (P x))) ($ (not (exists (x) (P x)))))))))
+    nil)
+   ($ '(implies (not (exists (x) (P x))) (forall (z) (not (P z))))))
+  "DPL page 157")
+
+(defparameter *fol-test-15*
+  (list
+   (list 
+    '(assume ($ (forall (x) (not (P x)))) in
+      (suppose-absurd ($ (exists (x) (P x))) in
+       (pick-witness y for ($ (exists (x) (P x))) in
+        (dseq 
+         (specialize ($ (forall (x) (not (P x)))) with y)
+         (absurd ($ (P y)) ($ (not (P y))))))))
+    nil)
+   ($ '(implies (forall (x) (not (P x))) (not (exists (x) (P x)))))))
+
 
 (defparameter *fol-tests* 
-  (let ((total-tests 12))
+  (let ((total-tests 15))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

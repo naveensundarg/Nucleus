@@ -105,5 +105,56 @@
 
 (define-method commutative-and (x)
   (! both (! right-and x) (! left-and x)))
+;;; Modal methods
 
+
+
+(define-primitive-method R1 (a time P)
+  (declare (ignore B))
+  ($ `(C ,time (implies (P ,a ,time ,P) (K ,a ,time ,P)))))
+
+(define-primitive-method R2 (a time P)
+    (declare (ignore B))
+    ($ `(C ,time (implies (P ,a ,time ,P) (B ,a ,time ,P)))))
+
+(define-primitive-method R3 (C agents times)
+  (check-in-base C B)
+  (pmatch C 
+          ((list 'C time P)
+           (if (mapcar (lambda (tt) (check-in-base (@prop `(< ,time ,tt)) B)) times)
+            ($ (reduce (lambda (prev agent-time)
+                         `(K ,(first agent-time) ,(second agent-time) ,prev))
+                       (reverse (zip agents times))
+                       :initial-value P))))
+          (otherwise (error "Not common knowledge: ~a" C))))
+
+(define-primitive-method R4 (Knows)
+  (check-in-base Knows B)
+  (pmatch Knows
+          ((list 'k _ _ P)
+           ($ P))
+          (otherwise "Not knowledge: ~a" knows)))
+
+
+(define-primitive-method R5 (time a t1 t2 t3 P1 P2)
+  (declare (ignore B))
+  ($ `(C ,time
+         (implies (K ,a ,t1 (implies ,P1 ,P2))
+                  (implies (K ,a ,t2 ,P1)
+                           (K ,a ,t3 ,P2))))))
+
+(define-primitive-method R6 (time a t1 t2 t3 P1 P2)
+  (declare (ignore B))
+  ($ `(C ,time
+         (implies (B ,a ,t1 (implies ,P1 ,P2))
+                  (implies (B ,a ,t2 ,P1)
+                           (B ,a ,t3 ,P2))))))
+
+
+(define-primitive-method R7 (time t1 t2 t3 P1 P2)
+  (declare (ignore B))
+  ($ `(C ,time
+         (implies (C ,t1 (implies ,P1 ,P2))
+                  (implies (C ,t2 ,P1)
+                           (C ,t3 ,P2))))))
 
