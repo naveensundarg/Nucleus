@@ -44,14 +44,25 @@
 
 (defparameter *modal-test-7*
   (list 
-   (list '(R7 't 'a 't1 't2 't3 'P1 'P2 )
+   (list '(R7 't  't1 't2 't3 'P1 'P2 )
          nil)
    ($ '(C t (implies (C t1 (implies p1 p2)) 
              (implies (C t2 p1) (C t3  p2)))))))
 
 
+(defparameter *modal-test-8*
+  (list 
+   (list '(R8 ($ (forall (x) (Q x))) 't 'a) nil)
+   ($ '(C T (IMPLIES (FORALL (X) (Q X)) (Q A))))))
+
+(defparameter *modal-test-9*
+  (list 
+   (list '(R9 'time ($ P1) ($ P2)) nil)
+   ($ '(C time (implies (iff P1 P2) (implies (not P2) (not P1)))))))
+
+
 (defparameter *modal-tests* 
-  (let ((total-tests 7))
+  (let ((total-tests 9))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

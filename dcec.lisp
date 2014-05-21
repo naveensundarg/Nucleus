@@ -115,7 +115,7 @@
 
 (define-primitive-method R2 (a time P)
     (declare (ignore B))
-    ($ `(C ,time (implies (P ,a ,time ,P) (B ,a ,time ,P)))))
+    (@prop`(C ,time (implies (P ,a ,time ,P) (B ,a ,time ,P)))))
 
 (define-primitive-method R3 (C agents times)
   (check-in-base C B)
@@ -157,4 +157,25 @@
          (implies (C ,t1 (implies ,P1 ,P2))
                   (implies (C ,t2 ,P1)
                            (C ,t3 ,P2))))))
+
+(define-primitive-method R8 (P time term)
+  (declare (ignore B))
+  (pmatch P
+          ((list 'forall _ _)
+           ($ `(C ,time (implies ,(p-value P)
+                                ,(subst-var 
+                                 (top-var (p-value P)) term 
+                                 (kernel (p-value P)))))))
+          (otherwise (error "Not a universal:~a"P))))
+
+(define-primitive-method R9 (time P1 P2)
+ (declare (ignore B))
+ (@prop `(C ,time (implies (iff ,P1 ,P2)
+                           (implies (not ,P2) (not ,P1))))))
+
+
+;;; R10 missing
+;;; R11 missing
+;;; R12 missing
+
 

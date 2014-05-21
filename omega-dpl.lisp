@@ -103,17 +103,18 @@
 (defun matches (pat obj) (equalp obj pat))
 
 (defun @prop (x)
-  (flet ((head (p) (first p))
+  (labels ((head (p) (first p))
          (tail (p) (rest p))
          (val (p) 
            (if (equalp 'proposition (type-of p))
                (p-value p)
-               p)))
+               (if (atom p) p
+                   (cons (val (head p)) (mapcar #'val (rest p)))))))
     (cond
       ((equal 'proposition (type-of x)) x)
       ((atom x) ($ x))
       (t ($ (cons (val (head x)) 
-                  (mapcar (lambda (y) (val y) )
+                  (mapcar (lambda (y) (val y))
                           (tail x))))))))
 
 (defun quantifier (quantifiedF)
@@ -130,7 +131,7 @@
   (optima:match quantifiedF 
     ((list (or 'forall 'exists) _ K) K)))
 
-(defun top-var (quantifiedF)
+(defun top-var (quantifiedF)33
   (optima:match quantifiedF 
     ((list (or 'forall 'exists) vars _) (first vars))))
 
