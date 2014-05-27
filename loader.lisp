@@ -16,6 +16,7 @@
    "dcec.lisp"
    "propositional-tests"
    "fol-tests"
+   "modal-tests"
    "omega-dpl-tests"))
 
 (defun compile-and-load (pathname &key (verbose nil))

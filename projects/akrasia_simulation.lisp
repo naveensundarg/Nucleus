@@ -1,6 +1,9 @@
 ;;; IEEE Ethics 2014 Paper
 (in-package :snark-user)
+
 (defun $ (x) x)
+
+
 (defparameter *KB-selfd*
   (list
    ($ '(forall 
@@ -44,6 +47,7 @@
         (implies 
          (@ (holds (custody a I) time))
          (@  (not (happens (action I* (harm a)) time))))))))
+
 
 
 (defparameter *DCEC-FOL-APPROX*

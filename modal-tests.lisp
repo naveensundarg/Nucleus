@@ -60,9 +60,44 @@
    (list '(R9 'time ($ P1) ($ P2)) nil)
    ($ '(C time (implies (iff P1 P2) (implies (not P2) (not P1)))))))
 
+(defparameter *modal-test-10*
+  (list
+   (list '(assume ($ (implies P Q)) in
+           (assume ($ (B a t P)) in
+            (R11a ($ (B a t P)) ($ (implies P Q)))))
+         nil)
+   ($ '(implies (implies P Q) (implies (B a t P) (B a t Q))))))
+
+(defparameter *modal-test-11*
+  (list 
+   (list '(assume ($ (B a t P1)) in
+           (assume ($ (B a t P2)) in
+            (R11b ($ (B a t P1)) ($ (B a t P2)))))
+         nil)
+   ($ '(implies (B a t P1) 
+        (implies (B a t P2) 
+         (B a t (and P1 P2)))))))
+
+(defparameter *modal-test-12*
+  (list 
+   (list '(assume ($ (S p q t raining)) in
+           (R12 ($ (S p q t raining))))
+         nil)
+   ($ '(implies (S p q t raining) (B q t (B p t raining))))))
+
+
+
+(defparameter *modal-test-13*
+  (list 
+   (list '(assume ($ (I jack t (happens (action (* jack) eat) t1))) in
+           (R13 ($ (I jack t (happens (action (* jack) eat) t1)))))
+         nil)
+   ($ '(implies (I Jack t (happens (action (* Jack) eat) t1))
+        (P Jack time1 (happens (action (* Jack) eat) t1))))))
+
 
 (defparameter *modal-tests* 
-  (let ((total-tests 9))
+  (let ((total-tests 13))
     (mapcar (lambda (n)
 	      (eval 
 	       (read-from-string 

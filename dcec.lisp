@@ -175,7 +175,51 @@
 
 
 ;;; R10 missing
-;;; R11 missing
-;;; R12 missing
+
+;; (B a t P) and if P=>Q proves Q, we can have (B a t Q)
+(define-primitive-method R11a (Belief Implication)
+  (check-in-base Belief B)
+  (check-in-base Implication B)
+  (match (list (p-value Belief) (p-value Implication))
+    ((list (list 'B a time P) (list 'implies ant cons)) 
+     (if (equalp ant P) (@prop `(B ,a ,time ,cons))))))
 
 
+(define-primitive-method R11b (Belief1 Belief2)
+  (check-in-base Belief1 B)
+  (check-in-base Belief2 B)
+  (match (list (p-value Belief1) (p-value Belief2))
+    ((list (list 'B a1 time1 P1) (list 'B a2 time2 P2)) 
+     (if (and (equalp a1 a2) (equalp time1 time2))
+         (@prop `(B ,a1 ,time1 (and ,P1 ,P2)))))))
+
+
+
+(define-primitive-method R12 (says)
+  (check-in-base says B)
+  (pmatch Says
+          ((list 'S s h time F) (@prop `(B ,h ,time (B ,s ,time ,F))))
+          (otherwise (error "Not says:~a"says))))
+
+(defun agent= (a b) 
+  (or (equalp a b) 
+      (match a ((list '* x) (agent= b x)))
+      (match b ((list '* x) (agent= x a)))))
+
+(defun agent=s (a b) 
+  (match b ((list '* x) (equalp x a))))
+
+
+(define-primitive-method R13 (intends)
+  (check-in-base intends B)
+  (pmatch intends
+          ((list 'I a _ (list 'happens (list 'action b Act) time1)) 
+           (if (agent=s a b)
+               (@prop `(P ,a time1 (happens (action ,b ,Act) ,time1)))
+               (error "Agent specs not proper: ~a ~b" a b)))
+          (otherwise (error "Not intends:~a" intends))))
+
+
+;; R14 missing
+
+;; R15 missing
