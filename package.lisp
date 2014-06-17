@@ -10,7 +10,7 @@
 
 (defpackage #:omega-dpl
   (:use #:cl #:optima #:nucleus-library)
-  (:export :define-primitive-method :define-method :I)
+  (:export :define-primitive-method :define-method :I :*primitive-methods*)
   (:shadowing-import-from #:nucleus-library
                           #:get-var #:get-val #:subst* #:zip)
   (:shadowing-import-from #:optima
