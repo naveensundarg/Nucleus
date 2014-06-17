@@ -1,10 +1,8 @@
+(in-package :omega-dpl)
 
-(use-package 'optima)
 (defparameter *B* ())
 (defparameter *primitive-methods* (make-hash-table))
 (defparameter *derived-methods* (make-hash-table))
-(import 'optima:match)
-(import 'optima:guard)
 
 
 (defclass proposition () ((value :initarg :value  :accessor p-value)))

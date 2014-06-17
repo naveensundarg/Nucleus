@@ -1,3 +1,5 @@
+(in-package :patterns)
+
 (defun variablep (sym)
   (if (symbolp sym)  
       (let ((name (symbol-name sym)))

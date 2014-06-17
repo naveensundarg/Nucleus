@@ -1,3 +1,5 @@
+(in-package :dcec)
+
 (defmacro pmatch (prop &rest body) 
   `(let () (match (p-value ,prop) ,@body
                   (_ (error "could not match ~a"  (p-value ,prop) )))))
@@ -20,9 +22,10 @@
 (define-primitive-method modus-tollens (nconsequent implication)
   (have? nconsequent)
   (have? implication)
-  (match (p-value implication)
-    ((and (list 'implies ant conseq) (equalp conseq (p-value nconsequent))) 
-     (@prop `(not ,ant)))))
+  (optima:match (p-value implication)
+    ((list 'implies ant conseq) 
+     (if (equalp conseq (p-value nconsequent)) 
+         (@prop `(not ,ant))))))
 
 (define-primitive-method double-negation (P)
   (have? P)
@@ -104,7 +107,7 @@
 ;; Derived methods
 
 (define-method commutative-and (x)
-  (! both (! right-and x) (! left-and x)))
+  (both (right-and x) (left-and x)))
 ;;; Modal methods
 
 
@@ -203,11 +206,11 @@
 
 (defun agent= (a b) 
   (or (equalp a b) 
-      (match a ((list '* x) (agent= b x)))
-      (match b ((list '* x) (agent= x a)))))
+      (optima:match a ((list '* x) (agent= b x)))
+      (optima:match b ((list '* x) (agent= x a)))))
 
 (defun agent=s (a b) 
-  (match b ((list '* x) (equalp x a))))
+  (optima:match b ((list '* x) (equalp x a))))
 
 
 (define-primitive-method R13 (intends)

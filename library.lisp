@@ -1,3 +1,4 @@
+(in-package :nucleus-library)
 
 
 (defun get-var (binding) (first binding))
