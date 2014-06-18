@@ -13,13 +13,14 @@ The system has a first-order modal logic implemented in it.
 The DPL interpreter is invoked through the function **I**. Some
 examples are shown below. Look at the tests for more examples.
 
-evaluating 
+Evaluating  
 ```lisp
 (I  '(assume ($ (and P Q)) in 
            (both 
             (right-and ($ (and P Q))) 
             (left-and ($ (and P Q))))))
 ```
-  ```lisp
+gives us:
+```lisp
   (implies (and P Q) (and Q P))
-  ```
+```
