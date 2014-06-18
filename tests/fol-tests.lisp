@@ -1,3 +1,4 @@
+(in-package :dcec)
 
 (defparameter *fol-test-1* 
   (list 

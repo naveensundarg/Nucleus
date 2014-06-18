@@ -64,7 +64,7 @@
      ded-results)))
 
 (defun check-in-base (P B)  
-  (if (not (member P B :test
+  (if (not (member P (remove nil B) :test
                    #'(lambda (x y) (F= (p-value x)  (p-value y)))))
       (error "~a not in the assumption base." P)
       P))
@@ -148,7 +148,7 @@
     (I (subst* (zip (first def) values) (second def)) B)))
 
 (defun prop? (x)  (equalp 'proposition (type-of x)))
-(defun false? (x) (equalp (p-value x) 'false))
+(defun false? (x) (sym= (p-value x) 'false))
 (defparameter *trace* nil)
 
 (defun dseq (B Deds)

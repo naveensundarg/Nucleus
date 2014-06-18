@@ -22,11 +22,12 @@
      (if (and   (equalp F var) (not (member F bound)))
          term F))))
 
-
+(defun sym= (x y)
+  (and (symbolp x) (symbolp y) (equalp (symbol-name x) (symbol-name y))))
 (defun F= (F1 F2 &key (bound1 nil) (bound2 nil))
   (optima:match (list F1 F2) 
-    ((or (list (list 'forall vars1 K1) (list 'forall vars2 K2))
-         (list (list 'exists vars1 K1) (list 'exists vars2 K2)))
+    ((or (list (list 'omega-dpl::forall vars1 K1) (list 'omega-dpl::forall vars2 K2))
+         (list (list 'omega-dpl::exists vars1 K1) (list 'omega-dpl::exists vars2 K2)))
      (F= K1 K2 :bound1 (append bound1 vars1) :bound2 (append bound2 vars2)))
     ((list (cons head1 args1) (cons head2 args2))
      (every (complement #'null)
@@ -37,7 +38,7 @@
      (or
       (if (and (member F1 bound1) (member F2 bound2))
        (= (position F1 bound1) (position F2 bound2)))
-      (equalp F1 F2)))))
+      (sym= F1 F2)))))
 
 (defun wildcardvarp (sym)
   (and (variablep sym) 

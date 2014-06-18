@@ -1,6 +1,6 @@
 
 
-
+(in-package :dcec)
 
 (defparameter *propositional-test-1*
   (list  

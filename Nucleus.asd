@@ -11,5 +11,8 @@
                (:file "patterns")
                (:file "omega-dpl")
                (:file "dcec")
-               (:file "nucleus")))
+               (:file "./tests/tests")
+               (:file "./tests/propositional-tests")
+               (:file "./tests/fol-tests")
+               (:file "./tests/modal-tests")))
 

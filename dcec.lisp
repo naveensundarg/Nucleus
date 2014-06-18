@@ -1,13 +1,18 @@
 (in-package :dcec)
 
 (defmacro pmatch (prop &rest body) 
-  `(let () (match (p-value ,prop) ,@body
-                  (_ (error "could not match ~a"  (p-value ,prop) )))))
+  `(let ()   
+     (format t "pmatch: ~a" ',body)
+     (force-output t)
+     (optima:match (p-value ,prop) ,@body
+            (_ (error "could not match ~a "  (p-value ,prop))))))
 
 (defmacro have? (P) `(check-in-base ,P B))
 (define-primitive-method claim (P)
   (have? P))
-
+(defun is-conditional? (P) (optima:match P
+                             ((list 'implies _ _) P)
+                             (_ nil)))
 
 (defmacro {} () '(declare (ignore B)))
 (define-primitive-method modus-ponens (antecedent implication)

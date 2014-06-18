@@ -1,3 +1,4 @@
+(in-package :dcec)
 
 (defparameter *modal-test-1*
   (list 
@@ -120,7 +121,7 @@
 		  (let*
 		      ((I-out (apply #'I  (first test-case)))
 		       (result 
-                        (F= (p-value I-out) (p-value (second test-case)) )))
+                        (F= (p-value I-out) (p-value (second test-case)))))
 		    (format str 
 			    "--------~%Test Case ~a: ~%   ~a~%   ===>~%   ~a ~%   Passed? ~a~%" 
 			    (1+ count) 
