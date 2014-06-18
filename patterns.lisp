@@ -8,7 +8,10 @@
 	 (or
 	  (equalp "_" (subseq name 1 2))
 	  (alpha-char-p (char name 1)))))))
-
+(defun quantifier (quantifiedF)
+  (optima:match quantifiedF 
+    ((list 'forall _ _) 'forall)
+    ((list 'exists _ _) 'exists)))
 (defun subst-var (var term F &optional (bound nil))
   (optima:match F 
     ((list (or 'forall 'exists) vars K) 

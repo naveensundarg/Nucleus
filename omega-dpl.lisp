@@ -9,6 +9,7 @@
 (defmethod print-object ((proposition proposition) stream)
   (format stream "[~a]"(p-value proposition)))
 
+
 (defun is-proposition? (proposition)
   (flet ((syntax-check (P)  
            (or  t (symbolp P) 
@@ -129,7 +130,7 @@
   (optima:match quantifiedF 
     ((list (or 'forall 'exists) _ K) K)))
 
-(defun top-var (quantifiedF)33
+(defun top-var (quantifiedF)
   (optima:match quantifiedF 
     ((list (or 'forall 'exists) vars _) (first vars))))
 

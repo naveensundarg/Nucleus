@@ -6,11 +6,17 @@
   (:export :get-var :get-val :subst* :zip))
 
 (defpackage #:patterns
-  (:use #:cl #:optima #:nucleus-library))
+  (:use #:cl #:optima #:nucleus-library)
+  (:export :unify :@ #:g :subst-var :F= ))
 
 (defpackage #:omega-dpl
-  (:use #:cl #:optima #:nucleus-library)
-  (:export :define-primitive-method :define-method :I :*primitive-methods*)
+  (:use #:cl #:optima #:nucleus-library #:patterns)
+  (:export 
+   :define-primitive-method :define-method
+   :I :p-value :kernel :matches :is-conditional?
+   :*primitive-methods* #:$ #:@ #:@prop #:check-in-base #:top-var
+   :assume :in :ex-generalize :from :pick-witness :for :pick-any
+   #:*B* #:B)
   (:shadowing-import-from #:nucleus-library
                           #:get-var #:get-val #:subst* #:zip)
   (:shadowing-import-from #:optima
@@ -18,10 +24,13 @@
                           #:match))
 
 (defpackage #:dcec
-  (:use #:cl #:omega-dpl #:nucleus-library)
+  (:use #:cl #:omega-dpl #:nucleus-library #:patterns)
   (:import-from #:omega-dpl
-               :define-primitive-method
-               :define-method)
+                :define-primitive-method
+                :define-method
+                :$ :@ :top-var
+                :*B* :@prop :check-in-base
+                :B)
   (:shadowing-import-from #:optima
                           #:guard
                           #:match)
