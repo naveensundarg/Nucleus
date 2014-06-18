@@ -241,10 +241,10 @@
 		       (result 
                         (F= (p-value I-out) (p-value (second test-case)) )))
 		    (format str 
-			    "--------~%Test Case ~a: ~%   ~a~%   ===>~%   ~a ~%   Passed? ~a~%" 
-			    (1+ count) 
-			    (first test-case)
-			    I-out
+			    "--------~%Test Case ~a: Passed? ~a~%" 
+			    (incf *count*) 
+			   ; (first test-case)
+			   ; I-out
 			    (if result
 				(progn (incf passed) "Yes.")   
 				"NO" ))

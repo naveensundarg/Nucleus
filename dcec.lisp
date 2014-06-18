@@ -2,8 +2,6 @@
 
 (defmacro pmatch (prop &rest body) 
   `(let ()   
-     (format t "pmatch: ~a" ',body)
-     (force-output t)
      (optima:match (p-value ,prop) ,@body
             (_ (error "could not match ~a "  (p-value ,prop))))))
 

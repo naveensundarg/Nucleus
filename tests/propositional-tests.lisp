@@ -4,10 +4,11 @@
 
 (defparameter *propositional-test-1*
   (list  
-   (list '(both (right-and ($ (and P Q))) (left-and ($ (and P Q)))) 
+   (list '(both 
+           (right-and ($ (and P Q))) ;Q
+           (left-and ($ (and P Q)))) ;P
          (list ($ '(and P Q))))
    ($ '(and Q P))))
-
 
 (defparameter *propositional-test-2*
   (list  
@@ -280,10 +281,10 @@
 		       (result 
                          (F= (p-value I-out) (p-value (second test-case)) )))
 		    (format str 
-			    "--------~%Test Case ~a: ~%   ~a~%   ===>~%   ~a ~%   Passed? ~a~%" 
-			    (1+ count) 
-			    (first test-case)
-			    I-out
+			    "--------~%Test Case ~a: Passed? ~a~%" 
+			    (incf *count*) 
+			  ;  (first test-case)
+			   ; I-out
 			    (if result
 				(progn (incf passed) "Yes.")   
 				"NO" ))
