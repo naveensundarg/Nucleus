@@ -47,3 +47,11 @@
 
 (defpackage #:tests
   (:use #:cl #:nucleus #:nucleus-library #:dcec #:omega-dpl #:patterns))
+
+
+(defpackage #:snark-interface
+  (:use #:cl)
+  (:export  #:!@ :consistent? :prove-from-axioms)) 
+
+(defpackage #:subjunctive
+  (:use #:cl #:snark-interface))

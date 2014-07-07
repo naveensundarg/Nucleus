@@ -14,5 +14,7 @@
                (:file "./tests/tests")
                (:file "./tests/propositional-tests")
                (:file "./tests/fol-tests")
-               (:file "./tests/modal-tests")))
+               (:file "./tests/modal-tests")
+               (:file "./snark-20120808r022/snark-system")
+               (:file "snark-interface")))
 
