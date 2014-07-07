@@ -34,7 +34,7 @@
 
 (defun general? (statements time)
   "Is the given set of statements general bounded by time?"
-  (let ;((ind-time (/ time (length *world-statement-forms*))))
+  (let ((ind-time (/ time (length *world-statement-forms*))))
     (general?-int statements time *world-statement-forms*)))
 
 

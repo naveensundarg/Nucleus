@@ -37,7 +37,7 @@
 
 
 (defun consistent? (statements time)
-  (prove-from-axioms statements '(and P (not P)) :time-limit time))
+  (not (prove-from-axioms statements '(and P (not P)) :time-limit time)))
 
 (defun !@ (x) 
   "reading logic forms with the symbols in the correct package"
