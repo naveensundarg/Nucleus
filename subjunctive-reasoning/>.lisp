@@ -27,3 +27,24 @@
                       t))))
           wl-enumeration)))
 
+
+(defparameter *ec-1*
+  '(forall (f t) (implies (and 
+                           (initially f)
+                           (not (clipped 0 f t)))
+                  (holds f t))))
+
+(defparameter *ec-2*
+  '(forall (e f t1 t2) 
+     (implies
+      (and (happens e t1) (initiates e f t1) (< t1 t2) (not (clipped t1 f t2)))
+      (holds f t2))))
+
+(defparameter *ec-3*
+  '(forall (t1 f t2)
+    '(iff (clipped t1 f t2)
+      (exists (e t) (and
+                     (happens e t)
+                     (< t1 t)
+                     (< t t2)
+                     (terminates e f t))))))

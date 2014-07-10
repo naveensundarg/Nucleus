@@ -36,16 +36,21 @@
   (let ((compounds 
           (set-difference signature (get-leaves signature)
                           :test #'equalp)))
-    (mapcar (lambda (term-sig) (multiply term-sig terms))
-            compounds))) 
+    (apply #'append (mapcar (lambda (term-sig) (multiply term-sig terms))
+                              compounds)))) 
 
 (defun generate-at-depth (signature depth)
   (if (= depth 0)
       (mapcar #'butlast (get-leaves signature))
       (remove nil  (multiply-all signature (generate-at-depth signature (1- depth))))))
 
-(defun generate (signature depth)
-  (if (= depth -1)
+(defun generate-int (signature currdepth maxdepth)
+  (if (< maxdepth currdepth)
       nil
-      (append (generate-at-depth signature depth)
-              (generate signature (1- depth)))))
+      (let ((curr-level-terms (generate-at-depth signature currdepth)))
+        (if curr-level-terms
+            (append  curr-level-terms (generate-int signature (1+ currdepth) maxdepth))))))
+
+(defun generate (signature depth)
+  (mapcar #'name 
+          (generate-int signature 0 depth)))
