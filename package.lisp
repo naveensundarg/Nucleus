@@ -43,15 +43,19 @@
 (defpackage #:nucleus
   (:use #:cl #:dcec #:nucleus-library))
 
-
-
-(defpackage #:tests
-  (:use #:cl #:nucleus #:nucleus-library #:dcec #:omega-dpl #:patterns))
-
-
 (defpackage #:snark-interface
+  (:documentation "Abstracting over SNARK's wonky interface.")
   (:use #:cl)
   (:export  #:!@ :consistent? :prove-from-axioms)) 
 
 (defpackage #:subjunctive
   (:use #:cl #:snark-interface))
+
+(defpackage #:enumerations 
+  (:documentation "Enumerating all terms of a certain depth given signature.")
+  (:nicknames :enums)
+  (:use #:cl)
+  (:export :declare-signature :generate))
+
+(defpackage #:tests
+  (:use #:cl #:nucleus #:nucleus-library #:dcec #:omega-dpl #:patterns))

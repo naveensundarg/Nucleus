@@ -58,13 +58,3 @@
 
 
 
-(defparameter *g-test-1*
-  (list 
-   '(forall (a t) (initiates 
-                   (action I (kick a)) 
-                   (damaged a)
-                   t))
-   '(not (happens (action I (kick S)) tp))
-   '(forall (a t) (implies (holds (damaged a) t)
-                   (exists tt (and (< tt t) (happens (action I (harmed a) tt))))))
-   '(< tp now)))

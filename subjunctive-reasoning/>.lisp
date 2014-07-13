@@ -34,6 +34,7 @@
                            (not (clipped 0 f t)))
                   (holds f t))))
 
+
 (defparameter *ec-2*
   '(forall (e f t1 t2) 
      (implies
@@ -48,3 +49,15 @@
                      (< t1 t)
                      (< t t2)
                      (terminates e f t))))))
+
+(defparameter *g-test-1*
+  (list 
+   '(forall (a t) (initiates 
+                   (action I (kick a)) 
+                   (damaged a)
+                   t))
+   '(forall (t1 a t2) (not (clipped t1 (damaged a) t2)))
+   '(not (happens (action I (kick S)) tp))
+   '(forall (a t) (implies (holds (damaged a) t)
+                   (exists tt (and (< tt t) (happens (action I (harmed a) tt))))))
+   '(< tp now)))

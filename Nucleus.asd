@@ -16,5 +16,8 @@
                (:file "./tests/fol-tests")
                (:file "./tests/modal-tests")
                (:file "./snark-20120808r022/snark-system")
-               (:file "snark-interface")))
+               (:file "snark-interface")
+               (:file "./subjunctive-reasoning/g")
+               (:file "./subjunctive-reasoning/>")
+               (:file "./utils/enumerations")))
 
