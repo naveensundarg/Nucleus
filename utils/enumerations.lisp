@@ -56,7 +56,7 @@
              :test #'equalp)))))
 
 (defun generate (signature depth &optional (sort nil))
-  (let ((generated (generate-int signature 0 depth)))
+  (let ((generated (generate-at-depth signature  depth)))
     (mapcar #'name 
             (if sort
                 (remove-if (complement (lambda (term) (equalp sort (outputs term)))) generated)
@@ -74,14 +74,14 @@
 
 ;;;; example from our IACAP paper
 (enums:declare-signature 
-	  *prob-1-sig*	  
-	  (:name S :output agent :inputs nil)
-	  (:name I :output agent :inputs nil)
-	  (:name damaged :output fluent :inputs (agent))
-	  (:name kick :output action :inputs (agent))
-	  (:name harmed :output action :inputs (agent))
-	  (:name initiates :output boolean :inputs (action fluent moment))
-	  (:name happens :output boolean :inputs (action moment))
-	  (:name holds :output boolean :inputs (fluent moment))
-	  (:name tp :output moment :inputs nil)
-	  (:name now :output moment :inputs nil))
+ *prob-1-sig*	  
+ (:name S :output agent :inputs nil)
+ (:name I :output agent :inputs nil)
+ (:name damaged :output fluent :inputs (agent))
+ (:name kick :output action :inputs (agent))
+ (:name harmed :output action :inputs (agent))
+ (:name initiates :output boolean :inputs (action fluent moment))
+ (:name happens :output boolean :inputs (action moment))
+ (:name holds :output boolean :inputs (fluent moment))
+ (:name tp :output moment :inputs nil)
+ (:name now :output moment :inputs nil))
