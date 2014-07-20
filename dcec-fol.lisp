@@ -1,19 +1,5 @@
-(in-package :snark-user)
+(in-package :dcec-fol)
 
-(defun snark-deverbose ()
-  (snark:print-options-when-starting  nil)
-  (snark:print-agenda-when-finished nil)
-  (snark:print-clocks-when-finished nil)
-  (snark:print-final-rows nil)
-  (snark:print-symbol-table-warnings nil)
-  (snark:print-summary-when-finished nil)
-  (snark:print-row-answers nil)
-  (snark:print-row-goals nil) 
-  (snark:print-rows-when-derived nil)
-  (snark:print-row-reasons nil)
-  (snark:print-row-partitions nil)
-  (snark:print-rows-prettily nil)
-  (snark:print-rows :min 0 :max 0))
 
 (defun setup-snark (&optional  (verbose nil))
   (snark:initialize :verbose  verbose)
@@ -22,58 +8,89 @@
   (snark:assert-supported t)
   (snark:assume-supported t)
   (snark:prove-supported t)
-  (snark:use-resolution t)
+  (snark:use-hyperresolution t)
   (snark:use-paramodulation t)
   (snark:allow-skolem-symbols-in-answers nil))
 
 
+(defun declare-sorts ()
+  (declare-sort 'Formula)
+  (declare-subsort 'Knowledge 'Formula)
+  (declare-subsort 'Belief 'Formula)
+  (declare-sort 'Agent )
+  (declare-subsort 'Moment 'Number)
+  (declare-relation '@ 1 :sort '(Formula)))
+
+(defun declare-logic-functors ()
+  (declare-function 'implies! 2 :sort '(Formula Formula Formula))
+  (declare-function 'iff! 2 :sort '(Formula Formula Formula))
+  (declare-function 'and! 2 :sort '(Formula Formula Formula))
+  (declare-function 'or! 2 :sort '(Formula Formula Formula))
+  (declare-function 'not! 1 :sort '(Formula Formula)))
+
+(defun declare-modal-functors ()
+  (declare-function 'C 2 :sort '(Formula Moment Formula))
+  (declare-function 'P 3 :sort '(Formula Agent Moment Formula))
+  (declare-function 'K 3 :sort '(Formula Agent Moment Formula))
+  (declare-function 'B 3 :sort '(Formula Agent Moment Formula)))
+
+
+(defun declare-all-sorts-and-functors ()
+  (declare-sorts)
+  (declare-logic-functors)
+  (declare-modal-functors))
 
 (defparameter *NOT*
-  '(forall (P1)
-    (iff (@ (not P1)) (not (@ P1)))))
+  '(forall ((?P Formula))
+    (iff (@ (not! ?P)) (not (@ ?P)))))
 
 (defparameter *IMPL*
-  '(forall (P1 P2) 
+  '(forall ((?P1 Formula) (?P2 Formula)) 
         (iff 
-         (@ (implies P1 P2)) 
-         (implies (@ P1) 
-          (@ P2)))))
+         (@ (implies! ?P1 ?P2)) 
+         (implies (@ ?P1) 
+          (@ ?P2)))))
 
 (defparameter *AND*
-  '(forall (P1 P2) 
+  '(forall ((?P1 Formula) (?P2 Formula)) 
         (iff 
-         (@ (and P1 P2)) 
-         (and (@ P1) 
-          (@ P2)))))
+         (@ (and! ?P1 ?P2)) 
+         (and (@ ?P1) 
+          (@ ?P2)))))
 
 (defparameter *OR*
-  '(forall (P1 P2) 
+  '(forall ((?P1 Formula) (?P2 Formula)) 
         (iff 
-         (@ (or P1 P2)) 
-         (or (@ P1) 
-          (@ P2)))))
+         (@ (or! ?P1 ?P2)) 
+         (or (@ ?P1) 
+          (@ ?P2)))))
 
 (defparameter *R1*
-  '(forall (a t F) (@ (C t 
-                       (implies (P a t F)
-                                (K a t F))))))
+  '(forall ((?a Agent) (?t Moment) (?F Formula)) 
+    (@ (C ?t 
+        (implies! (P ?a ?t ?F)
+                 (K ?a ?t ?F))))))
 
 (defparameter *R2*
-  '(forall (a t F) (@ (C t 
-                       (implies (K a t F)
-                                (B a t F))))))
+  '(forall ((?a Agent) (?t Moment) (?F Formula))
+    (@ (C ?t 
+        (implies! (K ?a ?t ?F)
+                 (B ?a ?t ?F))))))
 
-(defparameter *R3*
-  '(forall (t F a1 a2 a3 t1 t2 t3)
+(defparameter *R3-2*
+  '(forall ((?t Moment)
+            (?F Formula) 
+            (?a1 Agent) (?a2 Agent)
+            (?t1 Moment) (?t2 Moment))
     (implies 
-     (and (<p t t1) (<p t t2) (<p t t3) (@ (C t F))) 
-     (@ (K a1 t1 (K a2 t2 (K a3 t3 F)))))))
+     (and (< ?t ?t1) (< ?t ?t2)   (@ (C ?t ?F))) 
+     (@ (K ?a1 ?t1 (K ?a2 ?t2 ?F))))))
 
 (defparameter *R4*
-  '(forall (a t F)
+  '(forall ((?a Agent) (?t Moment) (?F Formula))
     (implies 
-     (@ (K a t F)) 
-     (@ F))))
+     (@ (K ?a ?t ?F)) 
+     (@ ?F))))
 
 (defparameter *DR1*
   '(forall (t F a1 a2 t1 t2)
@@ -110,23 +127,24 @@
   '(forall (t) (<p t t)))
 
 
-(defparameter *DCEC-FOL-PURE*
+(defparameter *DCEC-FOL-PURE* 
   (list *time-1*
         *NOT* *OR* *AND* *IMPL*
-       ;(forall (F) '(iff (@ F) F))
-        *R1* *R2* *R3* *R4*
-        *DR1* *DR2* *DR3* *DR4*))
-
-(defun prove-from-axioms (axioms f)
-  (setup-snark)
-  (mapcar #'assert axioms)
-  (prove f))
-
-(defun prove-DCEC* (q)
-  (prove-from-axioms *DCEC-FOL-PURE* q))
+        *R1* *R2* *R3-2* *R4*
+      ;  *DR1* *DR2* *DR3* *DR4*
+        ))
 
 
-(prove-DCEC* '(@ (C now 
-                  (implies 
-                   (P jack now raining)
-                   (K jack now raining)))))
+(defun prove-from-axioms (axioms f &key constants verbose)
+  (setup-snark verbose)
+  (declare-all-sorts-and-functors)
+  (mapcar (lambda (decl) (apply #'declare-constant decl)) constants)
+  (mapcar #'snark::assert axioms)
+  (snark:prove f))
+
+(defun prove-DCEC* (premises q &key constants verbose)
+  (prove-from-axioms (append premises *DCEC-FOL-PURE*) q :constants constants
+  :verbose verbose))
+
+
+

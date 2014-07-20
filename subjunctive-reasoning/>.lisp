@@ -4,11 +4,14 @@
 (defparameter *empty-wl-enumeration* '( (implies P P)))
 
 
-(defun prove> (statements P>Q &key (wl-enumeration *empty-wl-enumeration* ) (time *infinity*))
+(defun generate-world-line ())
+(defun prove> (signature statements P>Q &key (wl-enumeration *empty-wl-enumeration* ) (time *infinity*))
   (prove>-int statements P>Q wl-enumeration time))
 
 (defun antecedent (P>Q) (second P>Q))
 (defun consequent (P>Q) (third P>Q))
+
+
 
 (defun prove>-int (statements P>Q wl-enumeration time)
   (every (complement #'null)
@@ -61,3 +64,18 @@
    '(forall (a t) (implies (holds (damaged a) t)
                    (exists tt (and (< tt t) (happens (action I (harmed a) tt))))))
    '(< tp now)))
+
+
+;;;; example from our IACAP paper
+(enums:declare-signature 
+ *prob-1-sig*	  
+ (:name S :output agent :inputs nil)
+ (:name I :output agent :inputs nil)
+ (:name damaged :output fluent :inputs (agent))
+ (:name kick :output action :inputs (agent))
+ (:name harmed :output action :inputs (agent))
+ (:name initiates :output initiates :inputs (action fluent moment))
+ (:name happens :output happens :inputs (action moment))
+ (:name holds :output holds :inputs (fluent moment))
+ (:name tp :output moment :inputs nil)
+ (:name now :output moment :inputs nil))

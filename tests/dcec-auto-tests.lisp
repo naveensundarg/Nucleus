@@ -1,4 +1,5 @@
-(in-package :snark-user)
+(in-package :dcec-fol)
+
 (defparameter *dcec-test-1* 
   '(@ (C now 
         (implies 

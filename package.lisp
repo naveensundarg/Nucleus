@@ -57,5 +57,10 @@
   (:use #:cl)
   (:export :declare-signature :generate))
 
+
+(defpackage #:dcec-fol 
+  (:documentation "Implementing an encoding of DCEC's proof theory in FOL.")
+  (:use #:cl #:snark #:snark-user)
+  (:import-from :snark :forall :not :implies :iff :and :or :exists))
 (defpackage #:tests
   (:use #:cl #:nucleus #:nucleus-library #:dcec #:omega-dpl #:patterns))
